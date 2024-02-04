@@ -1,0 +1,37 @@
+#' Caculate vector recovery ratio (VRR)
+#'
+#' @param Q.true The true Q-matrix.
+#' @param Q.sug A The Q-matrix that has being validated.
+#'
+#' @details
+#' The VRR shows the ability of the validation method to recover q-vectors, and is determined by
+#' \deqn{
+#'  VRR =\frac{\sum_{i=1}^{I}I(\mathbf{q}_{i}^{t} = \mathbf{q}_{i}^{s})}{I}
+#' }
+#' where \eqn{\mathbf{q}_{i}^{t}} denotes the \eqn{\mathbf{q}}-vector of item \code{i} in the true Q-matrix (\code{Q.true}),
+#' \eqn{\mathbf{q}_{i}^{s}} denotes the \eqn{\mathbf{q}}-vector of item \code{i} in the suggested Q-matrix(\code{Q.sug}),
+#' and \eqn{I(\cdot)} is the indicator function.
+#'
+#' @return
+#' A numeric (VRR index).
+#'
+#' @examples
+#' library(Qval)
+#'
+#' set.seed(123)
+#'
+#' example.Q1 <- sim.Q(5, 30)
+#' example.Q2 <- sim.MQ(example.Q1, 0.1)
+#' VRR <- getVRR(example.Q1, example.Q2)
+#' print(VRR)
+#'
+#' @export
+#'
+getVRR <- function(Q.true, Q.sug) {
+  VRR <- 0
+  K <- ncol(Q.true)
+  I <- nrow(Q.true)
+  dif <- rowSums(abs(Q.true - Q.sug))
+  same <- length(which(dif == 0))
+  return(same/I)
+}
