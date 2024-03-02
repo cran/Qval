@@ -7,7 +7,7 @@ set.seed(123)
 library(Qval)
 
 ## generate Q-matrix and data
-K <- 4
+K <- 5
 I <- 20
 example.Q <- sim.Q(K, I)
 IQ <- list(

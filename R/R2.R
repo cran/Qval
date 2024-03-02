@@ -55,9 +55,9 @@
 #' @references
 #' McFadden, D. (1974). Conditional logit analysis of qualitative choice behavior. In P. Zarembka (Ed.), Frontiers in economics (pp.105–142). Academic Press.
 #'
-#' Najera, P., Sorrel, M. A., de la Torre, J., & Abad, F. J. (2021). Balancing ft and parsimony to improve Q-matrix validation. British Journal of Mathematical and Statistical Psychology, 74, 110–130. https://doi.org/10.1111/bmsp.12228.
+#' Najera, P., Sorrel, M. A., de la Torre, J., & Abad, F. J. (2021). Balancing ft and parsimony to improve Q-matrix validation. British Journal of Mathematical and Statistical Psychology, 74, 110–130. DOI: 10.1111/bmsp.12228.
 #'
-#' Qin, H., & Guo, L. (2023). Using machine learning to improve Q-matrix validation. Behavior Research Methods. https://doi.org/10.3758/s13428-023-02126-0.
+#' Qin, H., & Guo, L. (2023). Using machine learning to improve Q-matrix validation. Behavior Research Methods. DOI: 10.3758/s13428-023-02126-0.
 #'
 #' @examples
 #' library(Qval)

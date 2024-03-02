@@ -56,7 +56,7 @@
 #'    \mathbf{\lambda}_{i}^{T} \mathbf{h}(\mathbf{q_{i}}, \mathbf{\alpha_{l}}) =
 #'    \lambda_{i0} + \sum_{k=1}^{K^\ast}\lambda_{ik}\alpha_{lk} +\sum_{k=1}^{K^\ast-1}\sum_{k'=k+1}^{K^\ast}
 #'    \lambda_{ik}\lambda_{ik'}\alpha_{lk}\alpha_{lk'} +
-#'    \cdots + \lambda_{12 \cdots K^\ast}\prod_{k=1}{K^\ast}\alpha_{lk}
+#'    \cdots + \lambda_{12 \cdots K^\ast}\prod_{k=1}^{K^\ast}\alpha_{lk}
 #' }
 #' Where, \eqn{P(X_{pi}=1|\mathbf{\alpha}_{l})} represents the probability of a subject with attribute mastery
 #' pattern \eqn{\mathbf{\alpha}_{l}}, where \eqn{l=1,2,\cdots,L} and \eqn{L=2^{K^\ast}}, correctly answering
@@ -71,15 +71,15 @@
 #' model that offers three types of link functions: identity link, log link, and logit link, which are defined as follows:
 #' \deqn{P(X_{pi}=1|\mathbf{\alpha}_{l}) =
 #'    \delta_{i0} + \sum_{k=1}^{K^\ast}\delta_{ik}\alpha_{lk} +\sum_{k=1}^{K^\ast-1}\sum_{k'=k+1}^{K^\ast}\delta_{ik}\delta_{ik'}\alpha_{lk}\alpha_{lk'} +
-#'    \cdots + \delta_{12{\cdots}K^\ast}\prod_{k=1}{K^\ast}\alpha_{lk}
+#'    \cdots + \delta_{12{\cdots}K^\ast}\prod_{k=1}^{K^\ast}\alpha_{lk}
 #' }
 #' \deqn{log(P(X_{pi}=1|\mathbf{\alpha}_{l})) =
 #'    v_{i0} + \sum_{k=1}^{K^\ast}v_{ik}\alpha_{lk} +\sum_{k=1}^{K^\ast-1}\sum_{k'=k+1}^{K^\ast}v_{ik}v_{ik'}\alpha_{lk}\alpha_{lk'} +
-#'    \cdots + v_{12{\cdots}K^\ast}\prod_{k=1}{K^\ast}\alpha_{lk}
+#'    \cdots + v_{12{\cdots}K^\ast}\prod_{k=1}^{K^\ast}\alpha_{lk}
 #' }
 #' \deqn{logit(P(X_{pi}=1|\mathbf{\alpha}_{l})) =
 #'    \lambda_{i0} + \sum_{k=1}^{K^\ast}\lambda_{ik}\alpha_{lk} +\sum_{k=1}^{K^\ast-1}\sum_{k'=k+1}^{K^\ast}\lambda_{ik}\lambda_{ik'}\alpha_{lk}\alpha_{lk'} +
-#'    \cdots + \lambda_{12{\cdots}K^\ast}\prod_{k=1}{K^\ast}\alpha_{lk}
+#'    \cdots + \lambda_{12{\cdots}K^\ast}\prod_{k=1}^{K^\ast}\alpha_{lk}
 #' }
 #' Where \eqn{\delta_{i0}}, \eqn{v_{i0}}, and \eqn{\lambda_{i0}} are the intercept parameters for the three
 #' link functions, respectively; \eqn{\delta_{ik}}, \eqn{v_{ik}}, and \eqn{\lambda_{ik}} are the main effect
@@ -92,17 +92,17 @@
 #'
 #' Specifically, the A-CDM can be formulated as:
 #' \deqn{P(X_{pi}=1|\mathbf{\alpha}_{l}) =
-#'    \delta_{i0} + \sum_{k=1}{K^\ast}\delta_{ik}\alpha_{lk}
+#'    \delta_{i0} + \sum_{k=1}^{K^\ast}\delta_{ik}\alpha_{lk}
 #' }
 #'
 #' The RRUM, can be written as:
 #' \deqn{log(P(X_{pi}=1|\mathbf{\alpha}_{l})) =
-#'    \lambda_{i0} + \sum_{k=1}{K^\ast}\lambda_{ik}\alpha_{lk}
+#'    \lambda_{i0} + \sum_{k=1}^{K^\ast}\lambda_{ik}\alpha_{lk}
 #' }
 #'
 #' The item response function for LLM can be given by:
 #' \deqn{logit(P(X_{pi}=1|\mathbf{\alpha}_{l})) =
-#'    \lambda_{i0} + \sum_{k=1}{K^\ast}\lambda_{ik}\alpha_{lk}
+#'    \lambda_{i0} + \sum_{k=1}^{K^\ast}\lambda_{ik}\alpha_{lk}
 #' }
 #'
 #' In the DINA model, every item is characterized by two key parameters: guessing (g) and slip (s). Within
@@ -141,27 +141,27 @@
 #' @author Haijiang Qin <Haijiang133@outlook.com>
 #'
 #' @references
-#' de la Torre, J. (2009). DINA Model and Parameter Estimation: A Didactic. Journal of Educational and Behavioral Statistics, 34(1), 115-130. https://doi.org/10.3102/1076998607309474.
+#' de la Torre, J. (2009). DINA Model and Parameter Estimation: A Didactic. Journal of Educational and Behavioral Statistics, 34(1), 115-130. DOI: 10.3102/1076998607309474.
 #'
-#' de la Torre, J., & Douglas, J. A. (2004). Higher-order latent trait models for cognitive diagnosis. Psychometrika, 69(3), 333-353. https://doi.org/10.1007/BF02295640.
+#' de la Torre, J., & Douglas, J. A. (2004). Higher-order latent trait models for cognitive diagnosis. Psychometrika, 69(3), 333-353. DOI: 10.1007/BF02295640.
 #'
-#' de la Torre, J. (2011). The Generalized DINA Model Framework. Psychometrika, 76(2), 179-199. https://doi.org/10.1007/s11336-011-9207-7.
+#' de la Torre, J. (2011). The Generalized DINA Model Framework. Psychometrika, 76(2), 179-199. DOI: 10.1007/s11336-011-9207-7.
 #'
-#' Haertel, E. H. (1989). Using restricted latent class models to map the skill structure of achievement items. Journal of Educational Measurement, 26(4), 301-323. https://doi.org/10.1111/j.1745-3984.1989.tb00336.x.
+#' Haertel, E. H. (1989). Using restricted latent class models to map the skill structure of achievement items. Journal of Educational Measurement, 26(4), 301-323. DOI: 10.1111/j.1745-3984.1989.tb00336.x.
 #'
 #' Hartz, S. M. (2002). A Bayesian framework for the unified model for assessing cognitive abilities: Blending theory with practicality (Unpublished doctoral dissertation). University of Illinois at Urbana-Champaign.
 #'
-#' Henson, R. A., Templin, J. L., & Willse, J. T. (2008). Defining a Family of Cognitive Diagnosis Models Using Log-Linear Models with Latent Variables. Psychometrika, 74(2), 191-210. https://doi.org/10.1007/s11336-008-9089-5.
+#' Henson, R. A., Templin, J. L., & Willse, J. T. (2008). Defining a Family of Cognitive Diagnosis Models Using Log-Linear Models with Latent Variables. Psychometrika, 74(2), 191-210. DOI: 10.1007/s11336-008-9089-5.
 #'
-#' Huebner, A., & Wang, C. (2011). A note on comparing examinee classification methods for cognitive diagnosis models. Educational and Psychological Measurement, 71, 407-419. https://doi.org/10.1177/0013164410388832.
+#' Huebner, A., & Wang, C. (2011). A note on comparing examinee classification methods for cognitive diagnosis models. Educational and Psychological Measurement, 71, 407-419. DOI: 10.1177/0013164410388832.
 #'
-#' Junker, B. W., & Sijtsma, K. (2001). Cognitive assessment models with few assumptions, and connections with nonparametric item response theory. Applied Psychological Measurement, 25(3), 258-272. https://doi.org/10.1177/01466210122032064.
+#' Junker, B. W., & Sijtsma, K. (2001). Cognitive assessment models with few assumptions, and connections with nonparametric item response theory. Applied Psychological Measurement, 25(3), 258-272. DOI: 10.1177/01466210122032064.
 #'
-#' Ma, W., & Jiang, Z. (2020). Estimating Cognitive Diagnosis Models in Small Samples: Bayes Modal Estimation and Monotonic Constraints. Applied Psychological Measurement, 45(2), 95-111. https://doi.org/10.1177/0146621620977681.
+#' Ma, W., & Jiang, Z. (2020). Estimating Cognitive Diagnosis Models in Small Samples: Bayes Modal Estimation and Monotonic Constraints. Applied Psychological Measurement, 45(2), 95-111. DOI: 10.1177/0146621620977681.
 #'
-#' Templin, J. L., & Henson, R. A. (2006). Measurement of psychological disorders using cognitive diagnosis models. Psychological methods, 11(3), 287-305. https://doi.org/10.1037/1082-989X.11.3.287.
+#' Templin, J. L., & Henson, R. A. (2006). Measurement of psychological disorders using cognitive diagnosis models. Psychological methods, 11(3), 287-305. DOI: 10.1037/1082-989X.11.3.287.
 #'
-#' Tu, D., Chiu, J., Ma, W., Wang, D., Cai, Y., & Ouyang, X. (2022). A multiple logistic regression-based (MLR-B) Q-matrix validation method for cognitive diagnosis models: A confirmatory approach. Behavior Research Methods. https://doi.org/10.3758/s13428-022-01880-x.
+#' Tu, D., Chiu, J., Ma, W., Wang, D., Cai, Y., & Ouyang, X. (2022). A multiple logistic regression-based (MLR-B) Q-matrix validation method for cognitive diagnosis models: A confirmatory approach. Behavior Research Methods. DOI: 10.3758/s13428-022-01880-x.
 #'
 #' @seealso \code{\link[Qval]{validation}}.
 #'

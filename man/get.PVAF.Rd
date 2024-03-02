@@ -75,7 +75,7 @@ print(PVAF)
 
 }
 \references{
-de la Torre, J., & Chiu, C. Y. (2016). A General Method of Empirical Q-matrix Validation. Psychometrika, 81(2), 253-273. https://doi.org/10.1007/s11336-015-9467-8.
+de la Torre, J., & Chiu, C. Y. (2016). A General Method of Empirical Q-matrix Validation. Psychometrika, 81(2), 253-273. DOI: 10.1007/s11336-015-9467-8.
 }
 \seealso{
 \code{\link[Qval]{validation}}

@@ -15,7 +15,7 @@
 #' Haijiang Qin <Haijiang133@outlook.com>
 #'
 #' @references
-#' de la Torre, J. (2011). The Generalized DINA Model Framework. Psychometrika, 76(2), 179-199. https://doi.org/10.1007/s11336-011-9207-7.
+#' de la Torre, J. (2011). The Generalized DINA Model Framework. Psychometrika, 76(2), 179-199. DOI: 10.1007/s11336-011-9207-7.
 #'
 #' @examples
 #'

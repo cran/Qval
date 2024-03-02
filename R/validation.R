@@ -27,7 +27,7 @@
 #'  \sum_{l=1}^{2^K} \pi_{l} {(P(X_{pi}=1|\mathbf{\alpha}_{l}) - P_{i}^{mean})}^2
 #' }
 #' where \eqn{\pi_{l}} represents the prior probability of mastery pattern \eqn{l};
-#' \eqn{P_{i}^{mean}=\sum_{k=1}{K}\pi_{l}P(X_{pi}=1|\mathbf{\alpha}_{l})} is the weighted
+#' \eqn{P_{i}^{mean}=\sum_{k=1}^{K}\pi_{l}P(X_{pi}=1|\mathbf{\alpha}_{l})} is the weighted
 #' average of the correct response probabilities across all attribute mastery patterns.
 #' When the q-vector is correctly specified, the calculated \eqn{\zeta^2} should be maximized,
 #' indicating the maximum discrimination of the item. However, in reality, \eqn{\zeta^2}
@@ -55,9 +55,9 @@
 #'
 #' The calculation method is as follows:
 #' \deqn{
-#'    Wald = {(\mathbf{R} \times P_{i}(\mathbf{\alpha}))}_{'}
-#'    {(\mathbf{R} \times \mathbf{V}_{i} \times \mathbf{R})}_{-1}
-#'    {(\mathbf{R} \times P_{i}(\mathbf{\alpha}))}
+#'    Wald = (\mathbf{R} \times P_{i}(\mathbf{\alpha}))^{'}
+#'    (\mathbf{R} \times \mathbf{V}_{i} \times \mathbf{R})^{-1}
+#'    (\mathbf{R} \times P_{i}(\mathbf{\alpha}))
 #' }
 #' \eqn{\mathbf{R}} represents the restriction matrix; \eqn{P_{i}(\mathbf{\alpha})} denotes
 #' the vector of correct response probabilities for item \eqn{i}; \eqn{\mathbf{V}_i} is the
@@ -177,25 +177,25 @@
 #'
 #' @references
 #'
-#' de la Torre, J., & Chiu, C. Y. (2016). A General Method of Empirical Q-matrix Validation. Psychometrika, 81(2), 253-273. https://doi.org/10.1007/s11336-015-9467-8.
+#' de la Torre, J., & Chiu, C. Y. (2016). A General Method of Empirical Q-matrix Validation. Psychometrika, 81(2), 253-273. DOI: 10.1007/s11336-015-9467-8.
 #'
-#' de la Torre, J. (2008). An Empirically Based Method of Q-Matrix Validation for the DINA Model: Development and Applications. Journal of Education Measurement, 45(4), 343-362. https://doi.org/10.1111/j.1745-3984.2008.00069.x.
+#' de la Torre, J. (2008). An Empirically Based Method of Q-Matrix Validation for the DINA Model: Development and Applications. Journal of Education Measurement, 45(4), 343-362. DOI: 10.1111/j.1745-3984.2008.00069.x.
 #'
-#' Lorenzo-Seva, U., Timmerman, M. E., & Kiers, H. A. (2011). The Hull method for selecting the number of common factors. Multivariate Behavioral Research, 46, 340–364. https://doi.org/10.1080/00273171.2011.564527.
+#' Lorenzo-Seva, U., Timmerman, M. E., & Kiers, H. A. (2011). The Hull method for selecting the number of common factors. Multivariate Behavioral Research, 46, 340–364. DOI: 10.1080/00273171.2011.564527.
 #'
-#' Ma, W., & de la Torre, J. (2020). An empirical Q-matrix validation method for the sequential generalized DINA model. British Journal of Mathematical and Statistical Psychology, 73(1), 142-163. https://doi.org/10.1111/bmsp.12156.
+#' Ma, W., & de la Torre, J. (2020). An empirical Q-matrix validation method for the sequential generalized DINA model. British Journal of Mathematical and Statistical Psychology, 73(1), 142-163. DOI: 10.1111/bmsp.12156.
 #'
 #' McFadden, D. (1974). Conditional logit analysis of qualitative choice behavior. In P. Zarembka (Ed.), Frontiers in economics (pp. 105–142). New York, NY: Academic Press.
 #'
-#' Najera, P., Sorrel, M. A., & Abad, F. J. (2019). Reconsidering Cutoff Points in the General Method of Empirical Q-Matrix Validation. Educational and Psychological Measurement, 79(4), 727-753. https://doi.org/10.1177/0013164418822700.
+#' Najera, P., Sorrel, M. A., & Abad, F. J. (2019). Reconsidering Cutoff Points in the General Method of Empirical Q-Matrix Validation. Educational and Psychological Measurement, 79(4), 727-753. DOI: 10.1177/0013164418822700.
 #'
-#' Najera, P., Sorrel, M. A., de la Torre, J., & Abad, F. J. (2020). Improving Robustness in Q-Matrix Validation Using an Iterative and Dynamic Procedure. Applied Psychological Measurement, 44(6), 431-446. https://doi.org/10.1177/0146621620909904.
+#' Najera, P., Sorrel, M. A., de la Torre, J., & Abad, F. J. (2020). Improving Robustness in Q-Matrix Validation Using an Iterative and Dynamic Procedure. Applied Psychological Measurement, 44(6), 431-446. DOI: 10.1177/0146621620909904.
 #'
-#' Najera, P., Sorrel, M. A., de la Torre, J., & Abad, F. J. (2021). Balancing fit and parsimony to improve Q-matrix validation. British Journal of Mathematical and Statistical Psychology, 74 Suppl 1, 110-130. https://doi.org/10.1111/bmsp.12228.
+#' Najera, P., Sorrel, M. A., de la Torre, J., & Abad, F. J. (2021). Balancing fit and parsimony to improve Q-matrix validation. British Journal of Mathematical and Statistical Psychology, 74 Suppl 1, 110-130. DOI: 10.1111/bmsp.12228.
 #'
-#' Terzi, R., & de la Torre, J. (2018). An Iterative Method for Empirically-Based Q-Matrix Validation. International Journal of Assessment Tools in Education, 248-262. https://doi.org/10.21449/ijate.407193.
+#' Terzi, R., & de la Torre, J. (2018). An Iterative Method for Empirically-Based Q-Matrix Validation. International Journal of Assessment Tools in Education, 248-262. DOI: 10.21449/ijate.40719.
 #'
-#' Tu, D., Chiu, J., Ma, W., Wang, D., Cai, Y., & Ouyang, X. (2022). A multiple logistic regression-based (MLR-B) Q-matrix validation method for cognitive diagnosis models: A confirmatory approach. Behavior Research Methods. https://doi.org/10.3758/s13428-022-01880-x.
+#' Tu, D., Chiu, J., Ma, W., Wang, D., Cai, Y., & Ouyang, X. (2022). A multiple logistic regression-based (MLR-B) Q-matrix validation method for cognitive diagnosis models: A confirmatory approach. Behavior Research Methods. DOI: 10.3758/s13428-022-01880-x.
 #'
 #' @examples
 #' ################################################################

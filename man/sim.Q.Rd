@@ -28,7 +28,7 @@ print(Q)
 
 }
 \references{
-Najera, P., Sorrel, M. A., de la Torre, J., & Abad, F. J. (2021). Balancing fit and parsimony to improve Q-matrix validation. Br J Math Stat Psychol, 74 Suppl 1, 110-130. https://doi.org/10.1111/bmsp.12228.
+Najera, P., Sorrel, M. A., de la Torre, J., & Abad, F. J. (2021). Balancing fit and parsimony to improve Q-matrix validation. Br J Math Stat Psychol, 74 Suppl 1, 110-130. DOI: 10.1111/bmsp.12228.
 }
 \author{
 Haijiang Qin <Haijiang133@outlook.com>
