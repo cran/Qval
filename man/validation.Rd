@@ -8,6 +8,8 @@ validation(
   Y,
   Q,
   CDM.obj = NULL,
+  par.method = "BM",
+  mono.constraint = TRUE,
   model = "GDINA",
   method = "GDI",
   search.method = "PAA",
@@ -29,6 +31,12 @@ master item \code{i}.}
 
 \item{CDM.obj}{An object of class \code{CDM.obj}. When it is not NULL, it enables rapid verification
 of the Q-matrix without the need for parameter estimation. @seealso \code{\link[Qval]{CDM}}.}
+
+\item{par.method}{Type of mtehod to estimate CDMs' parameters; one out of \code{"EM"}, \code{"BM"}. Default = \code{"BM"}
+However, \code{"BM"} is only avaible when \code{method = "GDINA"}.}
+
+\item{mono.constraint}{Logical indicating whether monotonicity constraints should be fulfilled in estimation.
+Default = \code{TRUE}.}
 
 \item{model}{Type of model to fit; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"}
 , \code{"ACDM"}, \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.

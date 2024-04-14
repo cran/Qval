@@ -40,3 +40,4 @@ Q.GDI.obj <- validation(example.data$dat, example.MQ, method = "GDI", eps = 0.90
 
 ## check QRR
 print(getQRR(example.Q, Q.GDI.obj$Q.sug))
+

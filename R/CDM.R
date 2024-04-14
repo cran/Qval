@@ -18,8 +18,8 @@
 #'          item \code{i}.
 #' @param model Type of model to be fitted; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"}, \code{"ACDM"},
 #'            \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.
-#' @param method  Type of mtehod to estimate CDMs' parameters; one out of \code{"EM"}, \code{"BM"}. Default = \code{"EM"}
-#'                However, \code{"BM"} is only avaible when \code{method = "GDINA"}. See details.
+#' @param method  Type of mtehod to estimate CDMs' parameters; one out of \code{"EM"}, \code{"BM"}. Default = \code{"BM"}
+#'                However, \code{"BM"} is only avaible when \code{method = "GDINA"}.
 #' @param mono.constraint Logical indicating whether monotonicity constraints should be fulfilled in estimation.
 #'                        Default = \code{TRUE}.
 #' @param maxitr A vector for each item or nonzero category, or a scalar which will be used for all items
@@ -250,7 +250,7 @@
 #' @importFrom Matrix drop0
 #'
 
-CDM <- function(Y, Q, model="GDINA", method="EM",
+CDM <- function(Y, Q, model="GDINA", method="BM",
                 mono.constraint=TRUE, maxitr=2000, verbose=1){
 
   if(all(method != c("EM", "BM")))

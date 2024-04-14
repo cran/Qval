@@ -55,13 +55,14 @@
 #' print(fit.indices)
 #'
 #' @export
+#' @importFrom GDINA GDINA
 #' @importFrom GDINA modelfit
 #' @importFrom GDINA npar
-#'
 
 
 fit <- function(Y, Q, model="GDINA"){
-  GDINA.obj <- CDM(Y, Q, model = model, method = "EM")$analysis.obj
+  # GDINA.obj <- CDM(Y, Q, model = model, method = "EM")$analysis.obj
+  GDINA.obj <- GDINA(Y, Q, model)
   testfit <- modelfit(GDINA.obj)
   if(is.null(testfit$M2)){
     testfit$M2 <- 0

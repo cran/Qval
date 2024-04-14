@@ -1,4 +1,4 @@
-correctQ.GDI <- function(Y, Q, CDM.obj=NULL, model="GDINA",
+correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, model="GDINA",
                          search.method="ESA", maxitr=1, iter.level="test", eps=0.95,
                          verbose = TRUE){
 
@@ -20,7 +20,7 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, model="GDINA",
     priority <- NULL
 
     if(iter != 1 | is.null(CDM.obj))
-      CDM.obj <- CDM(Y, Q.GDI, model, verbose = verbose)
+      CDM.obj <- CDM(Y, Q.GDI, method=method, mono.constraint=mono.constraint, model=model, verbose = 0)
     alpha.P <- CDM.obj$alpha.P
     P.alpha <- CDM.obj$P.alpha
     alpha <- CDM.obj$alpha

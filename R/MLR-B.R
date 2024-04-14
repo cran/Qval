@@ -1,5 +1,5 @@
-correctQ.MLR <- function(Y, Q, CDM.obj=NULL, model="GDINA", search.method="ESA",
-                         maxitr=20, verbose = TRUE){
+correctQ.MLR <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, model="GDINA",
+                         search.method="ESA", maxitr=20, verbose = TRUE){
 
   N <- nrow(Y)
   I <- nrow(Q)
@@ -20,7 +20,7 @@ correctQ.MLR <- function(Y, Q, CDM.obj=NULL, model="GDINA", search.method="ESA",
 
     fit.index.ini <- rep(Inf, I)
     if(iter != 1 | is.null(CDM.obj))
-      CDM.obj <- CDM(Y, Q.MLR, model, verbose = 0)
+      CDM.obj <- CDM(Y, Q.MLR, method=method, mono.constraint=mono.constraint, model=model, verbose = 0)
     alpha.P <- CDM.obj$alpha.P
     alpha <- CDM.obj$alpha
 

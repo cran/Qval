@@ -142,6 +142,10 @@
 #'            master item \code{i}.
 #' @param CDM.obj An object of class \code{CDM.obj}. When it is not NULL, it enables rapid verification
 #'                of the Q-matrix without the need for parameter estimation. @seealso \code{\link[Qval]{CDM}}.
+#' @param par.method  Type of mtehod to estimate CDMs' parameters; one out of \code{"EM"}, \code{"BM"}. Default = \code{"BM"}
+#'                However, \code{"BM"} is only avaible when \code{method = "GDINA"}.
+#' @param mono.constraint Logical indicating whether monotonicity constraints should be fulfilled in estimation.
+#'                        Default = \code{TRUE}.
 #' @param model Type of model to fit; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"}
 #'              , \code{"ACDM"}, \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.
 #'              @seealso \code{\link[Qval]{CDM}}.
@@ -370,8 +374,9 @@
 #' @export
 #'
 
-validation <- function(Y, Q, CDM.obj=NULL, model="GDINA", method="GDI",
-                       search.method="PAA", maxitr=1, iter.level="test",
+validation <- function(Y, Q, 
+                       CDM.obj=NULL, par.method="BM", mono.constraint=TRUE, model="GDINA", 
+                       method="GDI", search.method="PAA", maxitr=1, iter.level="test",
                        eps=0.95, criter = "PVAF", verbose = TRUE){
   Y <- as.matrix(Y)
   Q <- as.matrix(Q)
@@ -398,13 +403,16 @@ validation <- function(Y, Q, CDM.obj=NULL, model="GDINA", method="GDI",
 
   time.cost <- system.time({
     if(method == "GDI")
-      Qval.obj <- correctQ.GDI(Y, Q, CDM.obj, model, search.method, maxitr, iter.level, eps, verbose)
+      Qval.obj <- correctQ.GDI(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model, 
+                               search.method, maxitr, iter.level, eps, verbose)
     else if(method == "Wald")
       Qval.obj <- correctQ.Wald(Y, Q, CDM.obj, model, search.method, maxitr, eps, verbose)
     else if(method == "Hull")
-      Qval.obj <- correctQ.Hull(Y, Q, CDM.obj, model, search.method, maxitr, iter.level, criter, verbose)
+      Qval.obj <- correctQ.Hull(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model, 
+                                search.method, maxitr, iter.level, criter, verbose)
     else
-      Qval.obj <- correctQ.MLR(Y, Q, CDM.obj, model, search.method, maxitr, verbose)
+      Qval.obj <- correctQ.MLR(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model, 
+                               search.method, maxitr, verbose)
   })
   res <- list(Q.orig = Qval.obj$Q.original, Q.sug = Qval.obj$Q.sug,
               priority = Qval.obj$priority, iter = Qval.obj$iter, time.cost = time.cost[1])

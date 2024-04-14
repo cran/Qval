@@ -8,7 +8,7 @@ CDM(
   Y,
   Q,
   model = "GDINA",
-  method = "EM",
+  method = "BM",
   mono.constraint = TRUE,
   maxitr = 2000,
   verbose = 1
@@ -26,8 +26,8 @@ item \code{i}.}
 \item{model}{Type of model to be fitted; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"}, \code{"ACDM"},
 \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.}
 
-\item{method}{Type of mtehod to estimate CDMs' parameters; one out of \code{"EM"}, \code{"BM"}. Default = \code{"EM"}
-However, \code{"BM"} is only avaible when \code{method = "GDINA"}. See details.}
+\item{method}{Type of mtehod to estimate CDMs' parameters; one out of \code{"EM"}, \code{"BM"}. Default = \code{"BM"}
+However, \code{"BM"} is only avaible when \code{method = "GDINA"}.}
 
 \item{mono.constraint}{Logical indicating whether monotonicity constraints should be fulfilled in estimation.
 Default = \code{TRUE}.}
