@@ -272,7 +272,7 @@ CDM <- function(Y, Q, model="GDINA", method="BM",
       mk <- rowSums(Q)
       numal <- 2^(mk)
       lcdm.ma <- list(designmatrix(Kj=mk[1], model = 'GDINA'))
-      for (j in 2:nrow(Q)) {
+      for (i in 2:nrow(Q)) {
         nextma <- designmatrix(Kj=mk[i], model = 'GDINA')
         list <- list(nextma)
         lcdm.ma <- c(lcdm.ma,list)
