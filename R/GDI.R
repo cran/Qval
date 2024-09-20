@@ -32,7 +32,9 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
 
       P.est <- (colSums(Y[, i] * P.alpha.Xi) + 1e-10) / (colSums(P.alpha.Xi) + 2e-10)
       P.mean <- sum(P.est * P.alpha)
-      zeta2.i.K <- sum((P.est - P.mean)^2 * P.alpha)
+      
+      P.Xi.alpha.L <- P.GDINA(rep(1, K), P.est, pattern, P.alpha)
+      zeta2.i.K <- sum((P.Xi.alpha.L - P.mean)^2 * P.alpha)
 
       P.Xi.alpha <- P.GDINA(pattern[Q.pattern.ini[i], ], P.est, pattern, P.alpha)
       PVAF.pre[i] <- PVAF.cur[i] <- sum((P.Xi.alpha - P.mean)^2 * P.alpha) / zeta2.i.K
@@ -163,7 +165,7 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
     if(verbose){
       cat(paste0('Iter=', iter, "/", maxitr, ","),
           change, 'items have changed,',
-          paste0("delta PVAF=", formatC(sum(PVAF.delta), digits = 5, format = "f")), "\n")
+          paste0("\u0394 PVAF=", formatC(sum(PVAF.delta), digits = 5, format = "f")), "\n")
     }
   }
   if(search.method == "PAA"){

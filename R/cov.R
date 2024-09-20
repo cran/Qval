@@ -1,7 +1,11 @@
+
+#' 
+#' @importFrom GDINA attributepattern
+#' 
 get.cov <- function(Y.i, P.alpha.Xi, P.Xi.alpha.reduced, Q.i.cur, pattern){
   att.posi <- which(Q.i.cur > 0)
   pattern.reduced <- attributepattern(length(att.posi))
-  pattern.2 <- pattern[, att.posi]
+  pattern.2 <- matrix(pattern[, att.posi], nrow = nrow(pattern))
 
   pattern.2.order <- rep(1, nrow(pattern.2))
   for(l in 1:nrow(pattern.2))

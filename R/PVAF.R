@@ -112,7 +112,6 @@ get.PVAF <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA"){
   for(i in 1:I){
     P.est <- (colSums(Y[, i] * P.alpha.Xi) + 1e-10) / (colSums(P.alpha.Xi) + 2e-10)
     P.mean <- sum(P.est * P.alpha)
-    zeta2.i.K <- sum((P.est - P.mean)^2 * P.alpha)
 
     zeta2 <- rep(-Inf, L)
     for(l in 2:L){

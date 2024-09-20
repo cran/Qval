@@ -16,7 +16,8 @@ An object of class \eqn{matrix}.
 }
 \description{
 generate a \eqn{I} * \eqn{K} Q-matrix randomly, which consisted of one-attribute q-vectors
-(0.5), two-attribute q-vectors (0.25), and three-attribute q-vectors (0.25).
+(0.5), two-attribute q-vectors (0.25), and three-attribute q-vectors (0.25). 
+This function ensures that the generated Q-matrix contains at least two identity matrices as a priority.
 }
 \examples{
 library(Qval)

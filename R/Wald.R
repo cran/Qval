@@ -1,8 +1,8 @@
 
 #' @importFrom GDINA attributepattern Qval
-correctQ.Wald <- function(Y, Q, CDM.obj=NULL, model="GDINA",
-                          search.method="ESA", maxitr=1,
-                          eps=0.95, verbose = TRUE){
+correctQ.Wald <- function(Y, Q, CDM.obj=NULL, 
+                          search.method="stepwise", maxitr=1,
+                          eps=0.95, alpha.level=0.05, verbose = TRUE){
 
   N <- nrow(Y)
   I <- nrow(Q)
@@ -30,9 +30,12 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, model="GDINA",
     Mmatrix <- get.Mmatrix(pattern = pattern)
 
     Q.pattern.cur <- rep(2, I)
-    ######################################## ESA ########################################
-    if(search.method == "ESA"){
-      Q.temp <- as.matrix(Qval(CDM.obj$analysis.obj, method = "wald")$sug.Q)
+    
+    ######################################## stepwise | forward ########################################
+    if(search.method == "stepwise" || search.method == "forward"){
+      Q.temp <- as.matrix(Qval(CDM.obj$analysis.obj, method = "wald", eps=eps, 
+                               wald.args = list(stepwise = ifelse(search.method == "stepwise", TRUE, FALSE), 
+                                                SE.type = 3, alpha.level=alpha.level))$sug.Q)
       for(i in 1:I){
         Q.pattern.cur[i] <- get.Pattern(Q.temp[i, ], pattern)
       }
@@ -50,13 +53,13 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, model="GDINA",
         priority <- rbind(priority, priority.cur)
 
         priority.temp <- priority.cur
+        
+        P.Xi.alpha.L <- P.GDINA(rep(1, K), P.est, pattern, P.alpha)
+        zeta2.i.K <- sum((P.Xi.alpha.L - P.mean)^2 * P.alpha)
+        
         Q.i <- rep(0, K)
-        zeta2.i.K <- sum((P.est - P.mean)^2 * P.alpha)
-        PVAF.i.k <- -Inf
-        q.possible <- which.max(priority.temp)+1
-
         search.length <- length(which(priority.cur > 0))
-
+        
         for(k in 1:search.length){
           Q.i.cur <- Q.i
           att.posi <- which.max(priority.temp)
@@ -77,15 +80,13 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, model="GDINA",
             q.possible <- q.possible.cur
             next
           }
-          P.Xi.alpha.reduced <- P.Xj.alpha.cur[which(Mmatrix[q.possible.cur, ] > 0)]
-          cov.cur <- get.cov(Y[, i], P.alpha.Xi, P.Xi.alpha.reduced, Q.i.cur, pattern)
-          if(!is.null(cov.cur)){
-            Wald.obj <- Wald.test(Q.i, Q.i.cur, P.Xi.alpha.reduced, cov.cur)
-            if(Wald.obj$p.value < 0.01){
-              Q.i <- Q.i.cur
-              q.possible <- q.possible.cur
-            }
+
+          Wald.obj <- Wald.test(CDM.obj, Q.i, Q.i.cur, i=i)
+          if(Wald.obj$p.value < alpha.level){
+            Q.i <- Q.i.cur
+            q.possible <- q.possible.cur
           }
+
         }
         Q.pattern.cur[i] <- q.possible
       }

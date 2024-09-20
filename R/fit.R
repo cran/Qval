@@ -61,7 +61,6 @@
 
 
 fit <- function(Y, Q, model="GDINA"){
-  # GDINA.obj <- CDM(Y, Q, model = model, method = "EM")$analysis.obj
   GDINA.obj <- GDINA(Y, Q, model)
   testfit <- modelfit(GDINA.obj)
   if(is.null(testfit$M2)){

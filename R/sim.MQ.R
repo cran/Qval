@@ -24,12 +24,14 @@
 #'
 #' @export
 #' @importFrom GDINA attributepattern
+#' @importFrom stats runif
+#' 
 #'
 
 sim.MQ <- function(Q, rate, verbose = TRUE){
   Q <- as.matrix(Q)
   sum <- floor(ncol(Q) * nrow(Q) * rate)
-  sum.1 <- round(stats::runif(1, 0, sum))
+  sum.1 <- round(runif(1, 0, sum))
   sum.1 <- ifelse(sum.1 <= round(sum(Q)*0.8), sum.1, round(sum(Q)*0.8))
   sum.0 <- sum - sum.1
   wrong.Q <- Q
@@ -43,7 +45,7 @@ sim.MQ <- function(Q, rate, verbose = TRUE){
   while (any(colSums(wrong.Q) == 0) | any(rowSums(wrong.Q) == 0)) {
     iter <- iter + 1
     if(iter %% 10000 == 0){
-      sum.1 <- round(stats::runif(1, 0, sum))
+      sum.1 <- round(runif(1, 0, sum))
       sum.1 <- ifelse(sum.1 <= round(sum(Q)*0.8), sum.1, round(sum(Q)*0.8))
       sum.0 <- sum - sum.1
     }

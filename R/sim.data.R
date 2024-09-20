@@ -113,6 +113,8 @@
 #' @export
 #' @importFrom GDINA attributepattern
 #' @importFrom GDINA simGDINA
+#' @importFrom stats runif qnorm rnorm sd
+#' 
 #'
 
 sim.data <- function(Q=NULL, N=NULL, IQ=list(P0=NULL, P1=NULL),
@@ -126,9 +128,9 @@ sim.data <- function(Q=NULL, N=NULL, IQ=list(P0=NULL, P1=NULL),
   if(is.null(N))
     N <- 500
   if(is.null(IQ$P0))
-    IQ$P0 <- stats::runif(I, 0, 0.3)
+    IQ$P0 <- runif(I, 0, 0.3)
   if(is.null(IQ$P1))
-    IQ$P1 <- stats::runif(I, 0.7, 1)
+    IQ$P1 <- runif(I, 0.7, 1)
   if(verbose){
     cat("distribute = ",distribute,"\n",
         "model = ",model,"\n",
@@ -147,7 +149,7 @@ sim.data <- function(Q=NULL, N=NULL, IQ=list(P0=NULL, P1=NULL),
       sigma <- control$sigma
     }
     if(is.null(control$cutoffs)){
-      cutoffs <- sample(stats::qnorm(c(1:K)/(K+1)), ncol(Q), replace = FALSE)
+      cutoffs <- sample(qnorm(c(1:K)/(K+1)), ncol(Q), replace = FALSE)
     }else{
       cutoffs <-control$cutoffs
     }
@@ -164,12 +166,12 @@ sim.data <- function(Q=NULL, N=NULL, IQ=list(P0=NULL, P1=NULL),
 
   if(distribute == "horder") {
     if(is.null(control$theta)){
-      theta <- stats::rnorm(N, 0, 1)
+      theta <- rnorm(N, 0, 1)
     }else{
       theta <- control$theta
     }
     if(is.null(control$a)){
-      a <- stats::runif(K,1.5, 1.5)
+      a <- runif(K,1.5, 1.5)
     }else{
       a <- control$a
     }
@@ -179,7 +181,7 @@ sim.data <- function(Q=NULL, N=NULL, IQ=list(P0=NULL, P1=NULL),
       b <-control$b
     }
     if(verbose){
-      cat("theta_mean = ", round(mean(theta), 3), ", theta_sd =", round(stats::sd(theta), 3), "\n",
+      cat("theta_mean = ", round(mean(theta), 3), ", theta_sd =", round(sd(theta), 3), "\n",
           "a = ", round(a, 3), "\n", "b = ", round(b, 3), "\n")
     }
 

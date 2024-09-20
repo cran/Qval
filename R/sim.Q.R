@@ -2,7 +2,8 @@
 #'
 #' @description
 #' generate a \eqn{I} * \eqn{K} Q-matrix randomly, which consisted of one-attribute q-vectors
-#' (0.5), two-attribute q-vectors (0.25), and three-attribute q-vectors (0.25).
+#' (0.5), two-attribute q-vectors (0.25), and three-attribute q-vectors (0.25). 
+#' This function ensures that the generated Q-matrix contains at least two identity matrices as a priority.
 #'
 #' @param I The number of items.
 #' @param K The number of attributes of each item.
@@ -34,7 +35,7 @@ sim.Q <- function(K, I){
   if(I < 2*K)
     stop("The number of items (I) must be twice or more than the number of attributes (K).\n")
 
-  alpha <- GDINA::attributepattern(K)
+  alpha <- attributepattern(K)
   Q.r <- rbind(alpha[2:(K+1), ], alpha[2:(K+1), ])
 
   I.1 <- ifelse(ceiling(I*0.5) > 2*K, ceiling(I*0.5), 2*K)

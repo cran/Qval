@@ -1,3 +1,5 @@
+
+#' @importFrom GDINA attributepattern
 correctQ.MLR <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, model="GDINA",
                          search.method="ESA", maxitr=20, verbose = TRUE){
 

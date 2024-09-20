@@ -105,12 +105,12 @@
 #' the equation with the minimum AIC fit as the validation result. The performance of this method in both the
 #' LCDM and GDM models even surpasses that of the Hull method, making it an efficient and reliable
 #' approach for Q-matrix correction.
-#'
+#' 
 #' @section Iterative procedure:
-#' The iterative procedure that one modification at a time is item level iteration (\code{"item"}) in (Najera
+#' The iterative procedure that one item modification at a time is item level iteration (\code{"item"}) in (Najera
 #' et al., 2020, 2021), while the iterative procedure that the entire Q-matrix is modified at each iteration
 #' is test level iteration (\code{"test"}) (Najera et al., 2020; Tu et al., 2022).
-#'
+#' 
 #' The steps of the \code{item} level iterative procedure algorithm are as follows:
 #' \describe{
 #'    \item{Step1}{Fit the \code{CDM} according to the item responses and the provisional Q-matrix (\eqn{\mathbf{Q}^0}).}
@@ -133,6 +133,64 @@
 #'                  \mathbf{Q}^0}; 2. Reach the max iteration (\code{maxitr}); 3. \eqn{\mathbf{Q}^1} does not satisfy
 #'                 the condition that an attribute is measured by one item at least.}
 #' }
+#' 
+#' @section Search algorithm:
+#' Three search algorithms are available: Exhaustive Search Algorithm (ESA), Sequential Search Algorithm (SSA), 
+#' and Priority Attribute Algorithm (PAA). 
+#' ESA is a brute-force algorithm. When validating the q-vector of a particular item, it traverses all possible 
+#' q-vectors and selects the most appropriate one based on the chosen Q-matrix validation method. Since there are 
+#' \eqn{2^{K-1}} possible q-vectors with \eqn{K} attributes, ESA requires \eqn{2^{K-1}} searches.
+#' 
+#' SSA reduces the number of searches by adding one attribute at a time to the q-vector in a stepwise manner. 
+#' Therefore, in the worst-case scenario, SSA requires \eqn{K(K-1)/2} searches.
+#' The detailed steps are as follows:
+#' \describe{
+#'    \item{Step 1}{Define an empty q-vector \eqn{\mathbf{q}^0=[00...0]} of length \eqn{K}, 
+#'                  where all elements are 0.}
+#'    \item{Step 2}{Examine all single-attribute q-vectors, which are those formed by 
+#'                  changing one of the 0s in \eqn{\mathbf{q}^0} to 1. 
+#'                  According to the criteria of the chosen Q-matrix validation method, 
+#'                  select the optimal single-attribute q-vector, denoted as \eqn{\mathbf{q}^1}.}
+#'    \item{Step 3}{Examine all two-attribute q-vectors, which are those formed by changing 
+#'                  one of the 0s in \eqn{\mathbf{q}^1} to 1. According to the criteria of the 
+#'                  chosen Q-matrix validation method, select the optimal two-attribute q-vector, 
+#'                  denoted as \eqn{\mathbf{q}^2}.}
+#'    \item{Step 4}{Repeat this process until \eqn{\mathbf{q}^K} is found, or the stopping criterion 
+#'                  of the chosen Q-matrix validation method is met.}
+#' }
+#' 
+#' PAA is a highly efficient and concise algorithm that evaluates whether each attribute needs to be included in the 
+#' q-vector based on the priority of the attributes. @seealso \code{\link[Qval]{get.priority}}. Therefore, even in the worst-case scenario, PAA only requires 
+#' \eqn{K} searches.
+#' The detailed process is as follows:
+#' \describe{
+#'    \item{Step 1}{Using the applicable CDM (e.g. the G-DINA model) to estimate the model parameters 
+#'                  and obtain the marginal attribute mastery probabilities matrix \eqn{\mathbf{\Lambda}}}
+#'    \item{Step 2}{Use LASSO regression to calculate the priority of each attribute in the q-vector for item \eqn{i}}
+#'    \item{Step 3}{Check whether each attribute is included in the optimal q-vector based on the attribute 
+#'                  priorities from high to low seriatim and output the final suggested q-vector according to the 
+#'                  criteria of the chosen Q-matrix validation method.}
+#' }
+#' 
+#' It should be noted that the Wald method proposed by Ma & de la Torre (2020) uses a \code{"stepwise"} search approach. 
+#' This approach involves incrementally adding or removing 1 from the q-vector and evaluating the significance of 
+#' the change using the Wald test: 
+#' 1. If removing a 1 results in non-significance (indicating that the 1 is unnecessary), the 1 is removed from the q-vector; 
+#'    otherwise, the q-vector remains unchanged. 
+#' 2. If adding a 1 results in significance (indicating that the 1 is necessary), the 1 is added to the q-vector; 
+#'    otherwise, the q-vector remains unchanged.
+#' The process stops when the q-vector no longer changes or when the PVAF reaches the preset cut-off point (i.e., 0.95).
+#' 
+#' The \code{"forward"} search approach is another search method available for the Wald method, and its logic is simple because 
+#' it merely keeps turning the 0s in the q vector into 1s, stopping when no more 0s can be turned into 1s or the PVAF 
+#' reaches the cut-off point.
+#' 
+#' Stepwise and Forward are unique search approach of the Wald method, and users should be aware of this. Since stepwise is 
+#' inefficient and differs significantly from the extremely high efficiency of PAA, \code{Qval} also provides \code{PAA} 
+#' for q-vector search in the Wald method. When applying the PAA version of the Wald method, the search still 
+#' examines whether each attribute is necessary (by checking if the Wald test reaches significance after adding the attribute) 
+#' according to attribute priority. The search stops when no further necessary attributes are found or when the 
+#' PVAF reaches the preset cut-off point (i.e., 0.95).
 #'
 #' @param Y A required \code{N} × \code{I} matrix or data.frame consisting of the responses of \code{N} individuals
 #'          to \code{I} items. Missing values need to be coded as \code{NA}.
@@ -142,7 +200,7 @@
 #'            master item \code{i}.
 #' @param CDM.obj An object of class \code{CDM.obj}. When it is not NULL, it enables rapid verification
 #'                of the Q-matrix without the need for parameter estimation. @seealso \code{\link[Qval]{CDM}}.
-#' @param par.method  Type of mtehod to estimate CDMs' parameters; one out of \code{"EM"}, \code{"BM"}. Default = \code{"BM"}
+#' @param par.method  Type of mtehod to estimate CDMs' parameters; one out of \code{"EM"}, \code{"BM"}. Default = \code{"EM"}
 #'                However, \code{"BM"} is only avaible when \code{method = "GDINA"}.
 #' @param mono.constraint Logical indicating whether monotonicity constraints should be fulfilled in estimation.
 #'                        Default = \code{TRUE}.
@@ -154,15 +212,21 @@
 #'               Default = \code{"GDI"}. See details.
 #' @param search.method Character string specifying the search method to use during validation.
 #'   \describe{
-#'     \item{"SSA"}{for sequential search algorithm (see de la Torre, 2008; Terzi & de la Torre, 2018). This option can be used when the \code{method} is \code{"GDI"} or \code{"MLR-B"}.}
-#'     \item{"ESA"}{for exhaustive search algorithm. This option can be used when the \code{method} is any of \code{"GDI"}, \code{"Wald"}, \code{"Hull"}, or \code{"MLR-B"}.}
+#'     \item{"SSA"}{for sequential search algorithm (see de la Torre, 2008; Terzi & de la Torre, 2018). 
+#'                  This option can be used when the \code{method} is \code{"GDI"}, \code{"Hull"} or \code{"MLR-B"}.}
+#'     \item{"ESA"}{for exhaustive search algorithm. This option can be used when the \code{method} is 
+#'                  any of \code{"GDI"}, \code{"Hull"}, or \code{"MLR-B"}.}
 #'     \item{"PAA"}{for priority attribute algorithm.
 #'                  This is the default option and can be used when the \code{method} is any of \code{"GDI"}, \code{"Wald"}, \code{"Hull"}, or \code{"MLR-B"}.}
+#'     \item{"stepwise"}{only for the \code{"Wald"}}
+#'     \item{"forward"}{only for the \code{"Wald"}}
 #'   }
 #' @param maxitr Number of max iterations. Default = \code{1}.
-#' @param iter.level Can be \code{"item"} level or \code{"test"} level. Default = \code{"test"}. See details.
+#' @param iter.level Can be \code{"item"} level or \code{"test"} level. Default = \code{"test"}. Only \code{"test"} 
+#'                   is available When method = \code{"Wald"} or \code{"MLR-B"}. See details.
 #' @param eps Cut-off points of \eqn{PVAF}, will work when the method is \code{"GDI"} or \code{"Wald"}.
 #'            Default = \code{0.95}. See details.
+#' @param alpha.level alpha level for the wald test. Default = \code{0.05}
 #' @param criter The kind of fit-index value, can be \eqn{R^2} for \eqn{R_{McFadden}^2} @seealso \code{\link[Qval]{get.R2}}
 #'               or \eqn{PVAF} for the proportion of variance accounted for (\eqn{PVAF}) @seealso \code{\link[Qval]{get.PVAF}}.
 #'               Only when \code{method = "Hull"} works and default = \code{"PVAF"}. See details.
@@ -174,6 +238,7 @@
 #' \item{Q.sug}{The Q-matrix that suggested by certain validation method.}
 #' \item{priority}{An \code{I} × \code{K} matrix that contains the priority of every attribute for
 #'                 each item. Only when the \code{search.method} is \code{"PAA"}, the value is availble. See details.}
+#' \item{Hull.fit}{A \code{list} containing all the information needed to plot the Hull plot, which is available only when \code{method} = \code{"Hull"}.}
 #' \item{iter}{The number of iteration.}
 #' \item{time.cost}{The time that CPU cost to finish the function.}
 #'
@@ -248,7 +313,7 @@
 #'                         eps = 0.90)
 #'
 #' ## check QRR
-#' print(getQRR(example.Q, Q.GDI.obj$Q.sug))
+#' print(zQRR(example.Q, Q.GDI.obj$Q.sug))
 #' }
 #'
 #'
@@ -287,7 +352,7 @@
 #' Q.Wald.obj <- validation(example.data$dat, example.MQ, method = "Wald")
 #'
 #' ## check QRR
-#' print(getQRR(example.Q, Q.Wald.obj$Q.sug))
+#' print(zQRR(example.Q, Q.Wald.obj$Q.sug))
 #' }
 #'
 #'
@@ -329,7 +394,7 @@
 #' Q.Hull.obj <- validation(example.data$dat, example.MQ, method = "Hull", criter = "R2")
 #'
 #' ## check QRR
-#' print(getQRR(example.Q, Q.Hull.obj$Q.sug))
+#' print(zQRR(example.Q, Q.Hull.obj$Q.sug))
 #' }
 #'
 #'
@@ -368,16 +433,16 @@
 #' Q.MLR.obj <- validation(example.data$dat, example.MQ, method  = "MLR-B")
 #'
 #' ## check QRR
-#' print(getQRR(example.Q, Q.Hull.obj$Q.sug))
+#' print(zQRR(example.Q, Q.Hull.obj$Q.sug))
 #' }
 #'
 #' @export
 #'
 
 validation <- function(Y, Q, 
-                       CDM.obj=NULL, par.method="BM", mono.constraint=TRUE, model="GDINA", 
+                       CDM.obj=NULL, par.method="EM", mono.constraint=TRUE, model="GDINA", 
                        method="GDI", search.method="PAA", maxitr=1, iter.level="test",
-                       eps=0.95, criter = "PVAF", verbose = TRUE){
+                       eps=0.95, alpha.level=0.05, criter = "PVAF", verbose = TRUE){
   Y <- as.matrix(Y)
   Q <- as.matrix(Q)
 
@@ -387,15 +452,19 @@ validation <- function(Y, Q,
   if(all(method != c("GDI", "Wald", "Hull", "MLR-B")))
     stop("method must be one of c('GDI', 'Wald', 'Hull', 'MLR-B') !")
 
-  if(search.method == "SSA")
-    if(method == "Wald" | method == "Hull")
-      stop(method, " can not work with SSA, GDI and MLR-B method only !")
+  if(search.method == "SSA" || search.method == "ESA")
+    if(method == "Wald")
+      stop("Wald can not work with ", search.method, " !")
+  
+  if(search.method == "stepwise" || search.method == "forward")
+    if(method != "Wald")
+      stop(search.method, " is for Wald method only !")
 
-  if(method == "Wald" & model != "GDINA")
+  if(method == "Wald" && model != "GDINA")
     stop("model must be GDINA when method are Wald !")
 
-  if(iter.level == "item" & (method == "Wald" | method == "MLR-B"))
-    stop("item level iterations are not avaliabel !")
+  if(iter.level == "item" && (method == "Wald" || method == "MLR-B"))
+    stop("item level iterations are not avaliabel for ", method, " !")
 
   if(verbose){
     cat(method, " method with ", search.method, " in ", iter.level, " level iteration ...\n")
@@ -403,21 +472,24 @@ validation <- function(Y, Q,
 
   time.cost <- system.time({
     if(method == "GDI")
-      Qval.obj <- correctQ.GDI(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model, 
-                               search.method, maxitr, iter.level, eps, verbose)
+      Qval.obj <- correctQ.GDI(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model=model, 
+                               search.method=search.method, maxitr=maxitr, iter.level=iter.level, eps=eps, verbose=verbose)
     else if(method == "Wald")
-      Qval.obj <- correctQ.Wald(Y, Q, CDM.obj, model, search.method, maxitr, eps, verbose)
+      Qval.obj <- correctQ.Wald(Y=Y, Q=Q, CDM.obj=CDM.obj, search.method=search.method, 
+                                maxitr=maxitr, eps=eps, alpha.level=alpha.level, verbose=verbose)
     else if(method == "Hull")
-      Qval.obj <- correctQ.Hull(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model, 
-                                search.method, maxitr, iter.level, criter, verbose)
+      Qval.obj <- correctQ.Hull(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model=model, 
+                                search.method=search.method, maxitr=maxitr, iter.level=iter.level, criter=criter, verbose=verbose)
     else
-      Qval.obj <- correctQ.MLR(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model, 
-                               search.method, maxitr, verbose)
+      Qval.obj <- correctQ.MLR(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model=model, 
+                               search.method=search.method, maxitr=maxitr, verbose=verbose)
   })
+  
   res <- list(Q.orig = Qval.obj$Q.original, Q.sug = Qval.obj$Q.sug,
-              priority = Qval.obj$priority, iter = Qval.obj$iter, time.cost = time.cost[1])
-
+              priority = Qval.obj$priority, Hull.fit = Qval.obj$Hull.fit, 
+              iter = Qval.obj$iter, time.cost = time.cost[1])
   class(res) <- "validation"
+
   return(res)
 }
 
