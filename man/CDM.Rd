@@ -86,9 +86,9 @@ Its definition of the probability of correct response is as follows:
 }
 \deqn{
    \mathbf{\lambda}_{i}^{T} \mathbf{h}(\mathbf{q_{i}}, \mathbf{\alpha_{l}}) =
-   \lambda_{i0} + \sum_{k=1}^{K^\ast}\lambda_{ik}\alpha_{lk} +\sum_{k=1}^{K^\ast-1}\sum_{k'=k+1}^{K^\ast}
-   \lambda_{ik}\lambda_{ik'}\alpha_{lk}\alpha_{lk'} +
-   \cdots + \lambda_{12 \cdots K^\ast}\prod_{k=1}^{K^\ast}\alpha_{lk}
+   \lambda_{i0} + \sum_{k=1}^{K^\ast}\lambda_{ik}\alpha_{lk} q_{ik} +\sum_{k=1}^{K^\ast-1}\sum_{k'=k+1}^{K^\ast}
+   \lambda_{ik}\lambda_{ik'}\alpha_{lk}\alpha_{lk'} q_{ik} q_{ik'} +
+   \cdots + \lambda_{12 \cdots K^\ast}\prod_{k=1}^{K^\ast}\alpha_{lk}q_{ik}
 }
 Where, \eqn{P(X_{pi}=1|\mathbf{\alpha}_{l})} represents the probability of a subject with attribute mastery
 pattern \eqn{\mathbf{\alpha}_{l}}, where \eqn{l=1,2,\cdots,L} and \eqn{L=2^{K^\ast}}, correctly answering

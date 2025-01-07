@@ -1,3 +1,4 @@
+
 .onAttach <- function(libname, pkgname){
   packageStartupMessage(StartWelcomeMessage())
 }
@@ -27,7 +28,6 @@
 }
 
 StartWelcomeMessage <- function(){
-
   paste("Qval R Package ",
         "(version ", utils::packageDescription("Qval")$Version,
         "; ",utils::packageDescription("Qval")$Date, ")\n",

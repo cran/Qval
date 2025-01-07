@@ -27,9 +27,9 @@ to accept a \code{CDM.obj}.
 }
 \details{
 \deqn{
-   Wald = (\mathbf{R} \times P_{i}(\mathbf{\alpha}))^{'}
+   Wald = \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]^{'}
    (\mathbf{R} \times \mathbf{V}_{i} \times \mathbf{R})^{-1}
-   (\mathbf{R} \times P_{i}(\mathbf{\alpha}))
+   \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]
 }
 }
 \examples{

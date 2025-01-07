@@ -62,6 +62,7 @@
 
 fit <- function(Y, Q, model="GDINA"){
   GDINA.obj <- GDINA(Y, Q, model)
+  cat("\n")
   testfit <- modelfit(GDINA.obj)
   if(is.null(testfit$M2)){
     testfit$M2 <- 0

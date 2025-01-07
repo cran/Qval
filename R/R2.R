@@ -112,22 +112,26 @@ get.R2 <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA"){
   alpha.P <- CDM.obj$alpha.P
   P.alpha <- CDM.obj$P.alpha
   alpha <- CDM.obj$alpha
-  P.Xi.alpha <- CDM.obj$P.Xi.alpha
+  P.alpha.Xi <- CDM.obj$P.alpha.Xi
 
   L.X <- matrix(0, I, L)
   L.Xi <- rep(0, N)
   for(i in 1:I){
-    Y.temp <- matrix(Y[, i], N, L, byrow = FALSE)
     P.i <- mean(Y[, i])
 
     L.X[i, 1] <- sum(log((P.i^Y[, i])*((1-P.i)^(1-Y[, i]))))
-    P.est <- (colSums(Y[, i] * P.Xi.alpha) + 1e-10) / (colSums(P.Xi.alpha) + 2e-10)
+    P.est <- calculatePEst(Y[, i], P.alpha.Xi)
 
     for(l in 2:L){
-      P.Xj.alpha <- P.GDINA(pattern[l, ], P.est, pattern, P.alpha)
-      P.Xj.alpha.temp <- matrix(P.Xj.alpha, N, L, byrow = TRUE)
-      L.Xi <- rowSums(P.Xi.alpha*(P.Xj.alpha.temp^Y.temp)*((1-P.Xj.alpha.temp)^(1-Y.temp)))
-      L.X[i, l] <- sum(log(L.Xi))
+      P.Xi.alpha <- P_GDINA(pattern[l, ], P.est, pattern, P.alpha)
+      L.X[i, l] <- log_likelihood_i(Y[, i], P.Xi.alpha, P.alpha.Xi)
+      
+      # Y.temp <- matrix(Y[, i], N, L, byrow = FALSE)
+      # P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
+      # L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
+      # L.X[i, l] <- sum(log(L.Xi))
+      
+      
     }
   }
   R2 <- 1 - L.X / L.X[, 1]

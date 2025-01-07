@@ -1,17 +1,22 @@
-correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, model="GDINA",
+#'
+#' @importFrom GDINA attributepattern
+#'
+correctQ.GDI <- function(Y, Q, 
+                         CDM.obj=NULL, method="EM", mono.constraint=TRUE, model="GDINA",
                          search.method="ESA", maxitr=1, iter.level="test", eps=0.95,
                          verbose = TRUE){
-
+  
   N <- nrow(Y)
   I <- nrow(Q)
   K <- ncol(Q)
   L <- 2^K
   pattern <- attributepattern(K)
+  eps.value <- eps
 
   Q.GDI <- Q
   Q.pattern.ini <- rep(2, I)
   for(i in 1:I)
-    Q.pattern.ini[i] <- get.Pattern(Q.GDI[i, ], pattern)
+    Q.pattern.ini[i] <- get_Pattern(Q.GDI[i, ], pattern)
   Q.pattern <- Q.pattern.ini
 
   iter <- 0
@@ -30,26 +35,32 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
     PVAF.pre <- PVAF.cur <- rep(0, I)
     for(i in 1:I){
 
-      P.est <- (colSums(Y[, i] * P.alpha.Xi) + 1e-10) / (colSums(P.alpha.Xi) + 2e-10)
+      P.est <- calculatePEst(Y[, i], P.alpha.Xi)
       P.mean <- sum(P.est * P.alpha)
       
-      P.Xi.alpha.L <- P.GDINA(rep(1, K), P.est, pattern, P.alpha)
+      if(eps == "logit"){
+        IQ <- 1 - P.est[1] - P.est[L]
+        eps.eq <- -0.405 + 2.867*IQ + 4.840*10^4*N - 3.316*10^3*I
+        eps.value <- exp(eps.eq) /(exp(eps.eq) + 1) 
+      }
+      
+      P.Xi.alpha.L <- P_GDINA(rep(1, K), P.est, pattern, P.alpha)
       zeta2.i.K <- sum((P.Xi.alpha.L - P.mean)^2 * P.alpha)
 
-      P.Xi.alpha <- P.GDINA(pattern[Q.pattern.ini[i], ], P.est, pattern, P.alpha)
+      P.Xi.alpha <- P_GDINA(pattern[Q.pattern.ini[i], ], P.est, pattern, P.alpha)
       PVAF.pre[i] <- PVAF.cur[i] <- sum((P.Xi.alpha - P.mean)^2 * P.alpha) / zeta2.i.K
 
       ######################################## ESA ########################################
       if(search.method == "ESA"){
         zeta2 <- rep(-Inf, L)
         for(l in 2:L){
-          P.Xi.alpha <- P.GDINA(pattern[l, ], P.est, pattern, P.alpha)
+          P.Xi.alpha <- P_GDINA(pattern[l, ], P.est, pattern, P.alpha)
           zeta2[l] <- sum((P.Xi.alpha - P.mean)^2 * P.alpha)
         }
         PVAF <- zeta2 / zeta2[L]
 
         for(l in 2:L){
-          if(PVAF[l] >= eps){
+          if(PVAF[l] >= eps.value){
             Q.pattern.cur[i] <- l
             PVAF.cur[i] <- PVAF[l]
             break
@@ -69,9 +80,9 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
             Q.i.cur <- Q.i
             if(Q.i[kk] == 0){
               Q.i.cur[kk] <- 1
-              q.possible.cur <- get.Pattern(Q.i.cur, pattern)
+              q.possible.cur <- get_Pattern(Q.i.cur, pattern)
 
-              P.Xi.alpha.cur <- P.GDINA(Q.i.cur, P.est, pattern, P.alpha)
+              P.Xi.alpha.cur <- P_GDINA(Q.i.cur, P.est, pattern, P.alpha)
               zeta2.i.k.cur <- sum((P.Xi.alpha.cur - P.mean)^2 * P.alpha)
               if(PVAF.i.k < zeta2.i.k.cur/zeta2.i.K){
                 Q.i.k <- Q.i.cur
@@ -83,7 +94,7 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
           if(!is.null(q.possible.k)){
             Q.i <- Q.i.k
             q.possible <- q.possible.k
-            if(PVAF.i.k >= eps){
+            if(PVAF.i.k >= eps.value){
               PVAF.cur[i] <- PVAF.i.k
               break
             }
@@ -110,16 +121,16 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
         for (k in 1:search.length) {
           att.posi <- which.max(priority.temp)
           Q.i[att.posi] <- 1
-          q.possible.cur <- get.Pattern(Q.i, pattern)
+          q.possible.cur <- get_Pattern(Q.i, pattern)
           priority.temp[att.posi] <- -Inf
 
-          P.Xi.alpha.cur <- P.GDINA(Q.i, P.est, pattern, P.alpha)
+          P.Xi.alpha.cur <- P_GDINA(Q.i, P.est, pattern, P.alpha)
           zeta2.i.k.cur <- sum((P.Xi.alpha.cur - P.mean)^2 * P.alpha)
 
           if (PVAF.i.k < zeta2.i.k.cur/zeta2.i.K) {
             q.possible <- q.possible.cur
             PVAF.cur[i] <- PVAF.i.k <- zeta2.i.k.cur/zeta2.i.K
-            if (PVAF.i.k >= eps) {
+            if (PVAF.i.k >= eps.value) {
               break
             }
           }
@@ -129,17 +140,19 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
       }
     }
 
-    Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
-    if(iter > 2)
-      if(all(Q.pattern.cur == Q.pattern[nrow(Q.pattern) - 2, ]))
-        break
+    
     validating.items <- which(Q.pattern.ini != Q.pattern.cur)
-    PVAF.delta <- abs(PVAF.pre - PVAF.cur)
+    PVAF.delta <- abs(PVAF.cur - PVAF.pre)
     if(iter.level == "item"){
-      if(sum(PVAF.delta) > 0.00010)
+      if(sum(PVAF.delta) > 0.00010){
         validating.items <- which.max(PVAF.delta)
-      else
+        Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
+        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+      }else{
         validating.items <- integer(0)
+      }
+    }else{
+      Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
     }
 
     change <- 0
@@ -163,9 +176,9 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
     }
 
     if(verbose){
-      cat(paste0('Iter=', iter, "/", maxitr, ","),
+      cat(paste0('Iter  =', sprintf("%4d", iter), "/", sprintf("%4d", maxitr), ","),
           change, 'items have changed,',
-          paste0("\u0394 PVAF=", formatC(sum(PVAF.delta), digits = 5, format = "f")), "\n")
+          paste0("\u0394PVAF=", formatC(sum(PVAF.delta[validating.items]), digits = 5, format = "f")), "\n")
     }
   }
   if(search.method == "PAA"){
@@ -173,5 +186,7 @@ correctQ.GDI <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
     colnames(priority) <- colnames(Q)
   }
 
-  return(list(Q.original = Q, Q.sug = Q.GDI, priority=priority, iter = iter - 1))
+  return(list(Q.original = Q, Q.sug = Q.GDI, 
+              process = Q.pattern, priority=priority, 
+              iter = iter - 1))
 }

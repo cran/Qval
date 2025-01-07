@@ -42,7 +42,20 @@
 #' the maximum discrimination. They selected an appropriate \eqn{PVAF} cut-off point to achieve
 #' a balance between q-vector fit and parsimony. According to previous studies,
 #' the \eqn{PVAF} cut-off point is typically set at 0.95 (Ma & de la Torre, 2020; Najera et al., 2021).
-#'
+#' Najera et al. (2019) proposed using multinomial logistic regression to predict a more appropriate cut-off point for \eqn{PVAF}. 
+#' The cut-off point is denoted as \eqn{eps}, and the predicted regression equation is as follows:
+#' 
+#' \deqn{ 
+#' \log \left( \frac{eps}{1-eps} \right) 
+#'    = \text{logit}(eps) 
+#'    = -0.405 + 2.867 \cdot IQ + 4.840 \times 10^4 \cdot N - 3.316 \times 10^3 \cdot I
+#'  }
+#'  Where \eqn{IQ} represents the question quality, calculated as the negative difference between the probability of an examinee 
+#'  with all attributes answering the question correctly and the probability of an examinee with no attributes answering the question correctly 
+#'  (\eqn{IQ = - \left\{ P\left( \mathbf{1} \right) - \left[ 1 - P\left( \mathbf{0} \right) \right] \right\}}), 
+#'  and \eqn{N} and \eqn{I} represent the number of examinees and the number of questions, respectively.
+#' 
+#' 
 #' @section The Wald method:
 #' The Wald method (Ma & de la Torre, 2020) combines the Wald test with \eqn{PVAF} to correct
 #' the Q-matrix at the item level. Its basic logic is as follows: when correcting item \eqn{i},
@@ -55,9 +68,9 @@
 #'
 #' The calculation method is as follows:
 #' \deqn{
-#'    Wald = (\mathbf{R} \times P_{i}(\mathbf{\alpha}))^{'}
+#'    Wald = \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]^{'}
 #'    (\mathbf{R} \times \mathbf{V}_{i} \times \mathbf{R})^{-1}
-#'    (\mathbf{R} \times P_{i}(\mathbf{\alpha}))
+#'    \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]
 #' }
 #' \eqn{\mathbf{R}} represents the restriction matrix; \eqn{P_{i}(\mathbf{\alpha})} denotes
 #' the vector of correct response probabilities for item \eqn{i}; \eqn{\mathbf{V}_i} is the
@@ -102,10 +115,47 @@
 #' subjects to perform multivariate logistic regression on their observed scores. This approach assumes
 #' all possible q-vectors and conducts \eqn{2^K-1} regression modelings. After proposing regression equations
 #' that exclude any insignificant regression coefficients, it selects the q-vector corresponding to
-#' the equation with the minimum AIC fit as the validation result. The performance of this method in both the
+#' the equation with the minimum \eqn{AIC} fit as the validation result. The performance of this method in both the
 #' LCDM and GDM models even surpasses that of the Hull method, making it an efficient and reliable
 #' approach for Q-matrix correction.
 #' 
+#' @section The \eqn{\beta} method:
+#' The \eqn{\beta} method (Li & Chen, 2024) addresses the Q-matrix validation problem from the 
+#' perspective of signal detection theory. Signal detection theory posits that any stimulus is 
+#' a signal embedded in noise, where the signal always overlaps with noise. The \eqn{\beta} method 
+#' treats the correct q-vector as the signal and other possible q-vectors as noise. The goal is 
+#' to identify the signal from the noise, i.e., to correctly identify the q-vector. For a question 
+#' \eqn{i} with the q-vector of the \eqn{c}-th type, the \eqn{\beta} index is computed as follows:
+#' 
+#' \deqn{
+#'    \beta_{jc} = \sum_{l=1}^{2^K} \left| \frac{r_{li}}{n_l} P_{ic}(\mathbf{\alpha_l}) - 
+#'                 \left(1 - \frac{r_{li}}{n_l}\right) \left[1 - P_{ic}(\mathbf{\alpha_l})\right] \right|
+#'               = \sum_{l=1}^{2^K} \left| \frac{r_{li}}{n_l} - \left[1 - P_{ic}(\mathbf{\alpha_l}) \right] \right|
+#'  }
+#'  
+#' In the formula, \eqn{r_{li}} represents the number of examinees in knowledge state \eqn{l} who correctly 
+#' answered item \eqn{i}, while \eqn{n_l} is the total number of examinees in knowledge state \eqn{l}. 
+#' \eqn{P_{ic}(\mathbf{\alpha_l})} denotes the probability that an examinee in knowledge state \eqn{l} answers 
+#' item \eqn{i} correctly when the q-vector for item \eqn{i} is of the \eqn{c}-th type. In fact, 
+#' \eqn{\frac{r_{li}}{n_l}} is the observed probability that an examinee in knowledge state \eqn{l} answers 
+#' item \eqn{i} correctly, and \eqn{\beta_{jc}} represents the difference between the actual proportion of 
+#' correct answers for item \eqn{i} in each knowledge state and the expected probability of answering the 
+#' item incorrectly in that state. Therefore, to some extent, \eqn{\beta_{jc}} can be considered as a measure 
+#' of discriminability, and the \eqn{\beta} method posits that the correct q-vector maximizes \eqn{\beta_{jc}}, 
+#' i.e.:
+#' 
+#' \deqn{
+#'    \mathbf{q}_i = \arg\max_{\mathbf{q}} \left( \beta_{jc} : \mathbf{q} \in \left\{ \mathbf{q}_{ic}, \, c = 1, 2, \dots, 2^{K} - 1 \right\} \right)
+#'  }
+#'  
+#' Therefore, essentially, \eqn{\beta_{jc}} is an index similar to GDI. Both increase as the number of attributes 
+#' in the q-vector increases. Unlike the GDI method, the \eqn{\beta} method does not continue to compute 
+#' \eqn{\beta_{jc} / \beta_{j[11...1]}} but instead uses the minimum \eqn{AIC} value to determine whether the attributes 
+#' in the q-vector are sufficient. In Package Qval, \link[parallel]{parLapply} will be used to accelerate the \eqn{\beta} method.
+#' 
+#' Please note that the \eqn{\beta} method has different meanings when applying different search algorithms. 
+#' For more details, see section 'Search algorithm' below.
+#'  
 #' @section Iterative procedure:
 #' The iterative procedure that one item modification at a time is item level iteration (\code{"item"}) in (Najera
 #' et al., 2020, 2021), while the iterative procedure that the entire Q-matrix is modified at each iteration
@@ -117,11 +167,13 @@
 #'    \item{Step2}{Validate the provisional Q-matrix and gain a suggested Q-matrix (\eqn{\mathbf{Q}^1}).}
 #'    \item{Step3}{for each item, \eqn{PVAF_{0i}} as the \eqn{PVAF} of the provisional q-vector specified in \eqn{\mathbf{Q}^0},
 #'                and \eqn{PVAF_{1i}} as the \eqn{PVAF} of the suggested q-vector in \eqn{\mathbf{Q}^1}.}
-#'    \item{Step4}{Calculate all items' \eqn{\delta PVAF_{i}}, defined as \eqn{\delta PVAF_{i} = |PVAF_{1i} - PVAF_{0i}|}}
-#'    \item{Step5}{Define the hit item as the item with the highest \eqn{\delta PVAF_{i}}.}
+#'    \item{Step4}{Calculate all items' \eqn{\Delta PVAF_{i}}, defined as \eqn{\Delta PVAF_{i} = |PVAF_{1i} - PVAF_{0i}|}}
+#'    \item{Step5}{Define the hit item as the item with the highest \eqn{\Delta PVAF_{i}}.}
 #'    \item{Step6}{Update \eqn{\mathbf{Q}^0} by changing the provisional q-vector by the suggested q-vector of the hit item.}
-#'    \item{Step7}{Iterate over Steps 1 to 6 until \eqn{\sum_{i=1}^{I} \delta PVAF_{i} = 0}}
+#'    \item{Step7}{Iterate over Steps 1 to 6 until \eqn{\sum_{i=1}^{I} \Delta PVAF_{i} = 0}}
 #' }
+#' When the Q-matrix validation method is \code{'MLR-B'}, \code{'Hull'} when \code{criter = 'R2'} or \code{'beta'}, \eqn{PVAF} is not used. 
+#' In this case, the criterion for determining which question's index will be replaced is \eqn{AIC}, \eqn{R^2}or \eqn{AIC}, respectively.
 #'
 #' The steps of the \code{test} level iterative procedure algorithm are as follows:
 #' \describe{
@@ -160,9 +212,8 @@
 #' }
 #' 
 #' PAA is a highly efficient and concise algorithm that evaluates whether each attribute needs to be included in the 
-#' q-vector based on the priority of the attributes. @seealso \code{\link[Qval]{get.priority}}. Therefore, even in the worst-case scenario, PAA only requires 
-#' \eqn{K} searches.
-#' The detailed process is as follows:
+#' q-vector based on the priority of the attributes. @seealso \code{\link[Qval]{get.priority}}. Therefore, even in 
+#' the worst-case scenario, PAA only requires \eqn{K} searches. The detailed process is as follows:
 #' \describe{
 #'    \item{Step 1}{Using the applicable CDM (e.g. the G-DINA model) to estimate the model parameters 
 #'                  and obtain the marginal attribute mastery probabilities matrix \eqn{\mathbf{\Lambda}}}
@@ -180,18 +231,45 @@
 #' 2. If adding a 1 results in significance (indicating that the 1 is necessary), the 1 is added to the q-vector; 
 #'    otherwise, the q-vector remains unchanged.
 #' The process stops when the q-vector no longer changes or when the PVAF reaches the preset cut-off point (i.e., 0.95).
-#' 
-#' The \code{"forward"} search approach is another search method available for the Wald method, and its logic is simple because 
-#' it merely keeps turning the 0s in the q vector into 1s, stopping when no more 0s can be turned into 1s or the PVAF 
-#' reaches the cut-off point.
-#' 
-#' Stepwise and Forward are unique search approach of the Wald method, and users should be aware of this. Since stepwise is 
-#' inefficient and differs significantly from the extremely high efficiency of PAA, \code{Qval} also provides \code{PAA} 
+#' Stepwise are unique search approach of the Wald method, and users should be aware of this. Since stepwise is 
+#' inefficient and differs significantly from the extremely high efficiency of PAA, Package \code{Qval} also provides \code{PAA} 
 #' for q-vector search in the Wald method. When applying the PAA version of the Wald method, the search still 
 #' examines whether each attribute is necessary (by checking if the Wald test reaches significance after adding the attribute) 
 #' according to attribute priority. The search stops when no further necessary attributes are found or when the 
-#' PVAF reaches the preset cut-off point (i.e., 0.95).
-#'
+#' PVAF reaches the preset cut-off point (i.e., 0.95). The "forward" search approach is another search method 
+#' available for the Wald method, which is equivalent to \code{'SSA'}. When \code{'Wald'} uses \code{search.method = 'SSA'}, 
+#' it means that the Wald method is employing the forward search approach. Its basic process is the same as \code{'stepwise'}, 
+#' except that it does not remove elements from the q-vector. Therefore, the "forward" search approach is essentially SSA.
+#' 
+#' Please note that, since the \eqn{\beta} method essentially selects q-vectors based on \eqn{AIC}, even without using the iterative process, 
+#' the \eqn{\beta} method requires multiple parameter estimations to obtain the AIC values for different q-vectors. 
+#' Therefore, the \eqn{\beta} method is more time-consuming and computationally intensive compared to the other methods. 
+#' Li and Chen (2024) introduced a specialized search approach for the \eqn{\beta} method, which is referred to as the 
+#' \eqn{\beta} search (\code{search.method = 'beta'}). The number of searches required is \eqn{2^{K-2} + K + 1}, and 
+#' the specific steps are as follows:
+#' \describe{
+#'    \item{Step 1}{For item \eqn{i}, sequentially examine the \eqn{\beta} values for each single-attribute q-vector, 
+#'                  select the largest \eqn{\beta_{most}} and the smallest \eqn{\beta_{least}}, along with the corresponding 
+#'                  attributes \eqn{k_{most}} and \eqn{k_{least}}. (K searches)}
+#'    \item{Step 2}{Then, add all possible q-vectors (a total of \eqn{2^K - 1}) containing attribute \eqn{k_{most}} and 
+#'                  not containing \eqn{k_{least}} to the search space \eqn{\mathbf{S}_i} (a total of \eqn{2^{K-2}})), and unconditionally 
+#'                  add the saturated q-vector \eqn{[11\ldots1]} to \eqn{\mathbf{S}_i} to ensure that it is tested.}
+#'    \item{Step 3}{Select the q-vector with the minimum AIC from \eqn{\mathbf{S}_i} as the final output of the \eqn{\beta} 
+#'                  method. (The remaining \eqn{2^{K-2} + 1} searches)}
+#' }
+#' The \code{Qval} package also provides three search methods, ESA, SSA, and PAA, for the \eqn{\beta} method. 
+#' When the \eqn{\beta} method applies these three search methods, Q-matrix validation can be completed without 
+#' calculating any \eqn{\beta} values, as the \eqn{\beta} method essentially uses \code{AIC} for selecting q-vectors. 
+#' For example, when applying ESA, the \eqn{\beta} method does not need to perform Step 1 of the \eqn{\beta} search 
+#' and only needs to include all possible q-vectors (a total of \eqn{2^K - 1}) in \eqn{\mathbf{S}_i}, then outputs 
+#' the corresponding q-vector based on the minimum \eqn{AIC}. When applying SSA or PAA, the \eqn{\beta} method also 
+#' does not require any calculation of \eqn{\beta} values. In this case, the \eqn{\beta} method is consistent 
+#' with the Q-matrix validation process described by Chen et al. (2013) using relative fit indices. Therefore, when 
+#' the \eqn{\beta} method does not use \eqn{\beta} search, it is equivalent to the method of Chen et al. (2013). 
+#' To better implement Chen et al. (2013)'s Q-matrix validation method using relative fit indices, the \code{Qval} 
+#' package also provides \eqn{BIC}, \eqn{CAIC}, and \eqn{SABIC} as alternatives to validate q-vectors, in addition 
+#' to \eqn{AIC}.
+#' 
 #' @param Y A required \code{N} × \code{I} matrix or data.frame consisting of the responses of \code{N} individuals
 #'          to \code{I} items. Missing values need to be coded as \code{NA}.
 #' @param Q A required binary \code{I} × \code{K} containing the attributes not required or required, 0 or 1,
@@ -207,38 +285,44 @@
 #' @param model Type of model to fit; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"}
 #'              , \code{"ACDM"}, \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.
 #'              @seealso \code{\link[Qval]{CDM}}.
-#' @param method The methods to validata Q-matrix, can be \code{"GDI"}, \code{"Wald"}, \code{"Hull"}, and
-#'               \code{"MLR-B"}. The \code{"model"} must be \code{"GDINA"} when \code{method = "Wald"}.
+#' @param method The methods to validata Q-matrix, can be \code{"GDI"}, \code{"Wald"}, \code{"Hull"}, 
+#'               \code{"MLR-B"} and \code{"beta"}. The \code{"model"} must be \code{"GDINA"} when 
+#'               \code{method = "Wald"}. Please note that the \eqn{\beta} method has different meanings 
+#'               when applying different search algorithms. For more details, see section 'Search algorithm' below.
 #'               Default = \code{"GDI"}. See details.
 #' @param search.method Character string specifying the search method to use during validation.
 #'   \describe{
+#'     \item{"ESA"}{for exhaustive search algorithm. Can not for the \code{'Wald'} method.}
 #'     \item{"SSA"}{for sequential search algorithm (see de la Torre, 2008; Terzi & de la Torre, 2018). 
-#'                  This option can be used when the \code{method} is \code{"GDI"}, \code{"Hull"} or \code{"MLR-B"}.}
-#'     \item{"ESA"}{for exhaustive search algorithm. This option can be used when the \code{method} is 
-#'                  any of \code{"GDI"}, \code{"Hull"}, or \code{"MLR-B"}.}
-#'     \item{"PAA"}{for priority attribute algorithm.
-#'                  This is the default option and can be used when the \code{method} is any of \code{"GDI"}, \code{"Wald"}, \code{"Hull"}, or \code{"MLR-B"}.}
-#'     \item{"stepwise"}{only for the \code{"Wald"}}
-#'     \item{"forward"}{only for the \code{"Wald"}}
+#'                  This option can be used when the. It will be equal to \code{"forward"} when \code{method = "Wald"}.}
+#'     \item{"PAA"}{for priority attribute algorithm. }
+#'     \item{"stepwise"}{only for the \code{"Wald" method}}
+#'     \item{"beta"}{only for the \code{"beta" method}}
 #'   }
 #' @param maxitr Number of max iterations. Default = \code{1}.
-#' @param iter.level Can be \code{"item"} level or \code{"test"} level. Default = \code{"test"}. Only \code{"test"} 
-#'                   is available When method = \code{"Wald"} or \code{"MLR-B"}. See details.
+#' @param iter.level Can be \code{"item"} level or \code{"test"} level. Default = \code{"test"}. See details.
 #' @param eps Cut-off points of \eqn{PVAF}, will work when the method is \code{"GDI"} or \code{"Wald"}.
 #'            Default = \code{0.95}. See details.
 #' @param alpha.level alpha level for the wald test. Default = \code{0.05}
-#' @param criter The kind of fit-index value, can be \eqn{R^2} for \eqn{R_{McFadden}^2} @seealso \code{\link[Qval]{get.R2}}
-#'               or \eqn{PVAF} for the proportion of variance accounted for (\eqn{PVAF}) @seealso \code{\link[Qval]{get.PVAF}}.
-#'               Only when \code{method = "Hull"} works and default = \code{"PVAF"}. See details.
+#' @param criter The kind of fit-index value. When \code{method = "Hull"}, it can be \code{R^2} for 
+#'               \eqn{R_{McFadden}^2} @seealso \code{\link[Qval]{get.R2}} or \code{'PVAF'} for the proportion of 
+#'               variance accounted for (\eqn{PVAF}) @seealso \code{\link[Qval]{get.PVAF}}. When 
+#'               \code{method = "beta"}, it can be \code{'AIC'}, \code{'BIC'}, \code{'CAIC'} or \code{'SABIC'}.
+#'               Default = \code{"PVAF"}. See details.
 #' @param verbose Logical indicating to print iterative information or not. Default is \code{TRUE}
 #'
 #' @return
 #' An object of class \code{validation} is a \code{list} containing the following components:
 #' \item{Q.orig}{The original Q-matrix that maybe contains some mis-specifications and need to be validate.}
 #' \item{Q.sug}{The Q-matrix that suggested by certain validation method.}
+#' \item{process}{A matrix that contains the modification process of each question during each iteration. 
+#'        Each row represents an iteration, and each column corresponds to the q-vector index of the respective 
+#'        question. The order of the indices is consistent with the row numbering in the matrix generated by 
+#'        the @seealso \code{\link[GDINA]{attributepattern}} function in the \code{GDINA} package.}
 #' \item{priority}{An \code{I} × \code{K} matrix that contains the priority of every attribute for
 #'                 each item. Only when the \code{search.method} is \code{"PAA"}, the value is availble. See details.}
-#' \item{Hull.fit}{A \code{list} containing all the information needed to plot the Hull plot, which is available only when \code{method} = \code{"Hull"}.}
+#' \item{Hull.fit}{A \code{list} containing all the information needed to plot the Hull plot, which is 
+#'                 available only when \code{method} = \code{"Hull"}.}
 #' \item{iter}{The number of iteration.}
 #' \item{time.cost}{The time that CPU cost to finish the function.}
 #'
@@ -246,10 +330,14 @@
 #'
 #' @references
 #'
+#' Chen, J., de la Torre, J., & Zhang, Z. (2013). Relative and Absolute Fit Evaluation in Cognitive Diagnosis Modeling. Journal of Educational Measurement, 50(2), 123-140. DOI: 10.1111/j.1745-3984.2012.00185.x 
+#' 
 #' de la Torre, J., & Chiu, C. Y. (2016). A General Method of Empirical Q-matrix Validation. Psychometrika, 81(2), 253-273. DOI: 10.1007/s11336-015-9467-8.
 #'
 #' de la Torre, J. (2008). An Empirically Based Method of Q-Matrix Validation for the DINA Model: Development and Applications. Journal of Education Measurement, 45(4), 343-362. DOI: 10.1111/j.1745-3984.2008.00069.x.
 #'
+#' Li, J., & Chen, P. (2024). A new Q-matrix validation method based on signal detection theory. British Journal of Mathematical and Statistical Psychology, 00, 1–33. DOI: 10.1111/bmsp.12371
+#' 
 #' Lorenzo-Seva, U., Timmerman, M. E., & Kiers, H. A. (2011). The Hull method for selecting the number of common factors. Multivariate Behavioral Research, 46, 340–364. DOI: 10.1080/00273171.2011.564527.
 #'
 #' Ma, W., & de la Torre, J. (2020). An empirical Q-matrix validation method for the sequential generalized DINA model. British Journal of Mathematical and Statistical Psychology, 73(1), 142-163. DOI: 10.1111/bmsp.12156.
@@ -433,12 +521,12 @@
 #' Q.MLR.obj <- validation(example.data$dat, example.MQ, method  = "MLR-B")
 #'
 #' ## check QRR
-#' print(zQRR(example.Q, Q.Hull.obj$Q.sug))
+#' print(zQRR(example.Q, Q.MLR.obj$Q.sug))
 #' }
+#' 
 #'
 #' @export
 #'
-
 validation <- function(Y, Q, 
                        CDM.obj=NULL, par.method="EM", mono.constraint=TRUE, model="GDINA", 
                        method="GDI", search.method="PAA", maxitr=1, iter.level="test",
@@ -446,47 +534,81 @@ validation <- function(Y, Q,
   Y <- as.matrix(Y)
   Q <- as.matrix(Q)
 
+  if(is.numeric(eps)){
+    if(eps > 1 || eps < 0){
+      stop("eps only accepts values between 0 and 1 !")
+    }
+  }else if(is.character(eps)){
+    if(eps != "logit"){
+      stop("eps can only be logit when it is character !")
+    }
+  }else{
+    stop("eps can only be 'logit' or numeric values between 0 and 1 !")
+  }
+  
   if(ncol(Q) == 1)
     stop("the number of attributes (K) must be greater than 1 !")
 
-  if(all(method != c("GDI", "Wald", "Hull", "MLR-B")))
-    stop("method must be one of c('GDI', 'Wald', 'Hull', 'MLR-B') !")
+  if(all(method != c("GDI", "Wald", "Hull", "MLR-B", "beta")))
+    stop("method must be one of c('GDI', 'Wald', 'Hull', 'MLR-B', 'beta') !")
+  
+  if(all(search.method != c("ESA", "SSA", "PAA", "stepwise", 'beta')))
+    stop("method must be one of c('ESA', 'SSA', 'PAA', 'stepwise', 'beta') !")
 
-  if(search.method == "SSA" || search.method == "ESA")
+  if(search.method == "ESA")
     if(method == "Wald")
       stop("Wald can not work with ", search.method, " !")
-  
-  if(search.method == "stepwise" || search.method == "forward")
+
+  if(search.method == "stepwise")
     if(method != "Wald")
       stop(search.method, " is for Wald method only !")
+  
+  if(search.method == "beta")
+    if(method != "beta")
+      stop(search.method, " is for \u03B2 method only !")
+  
+  if(method == "beta")
+    if(all(criter != c("AIC", "BIC", "CAIC", "SABIC")))
+      stop("criter must be one of c('AIC', 'BIC', 'CAIC', 'SABIC') when method = 'beta' !")
 
   if(method == "Wald" && model != "GDINA")
     stop("model must be GDINA when method are Wald !")
 
-  if(iter.level == "item" && (method == "Wald" || method == "MLR-B"))
-    stop("item level iterations are not avaliabel for ", method, " !")
+  method.print <- method
+  if(method == "beta"){
+    method.print <- "\u03B2"
+  }
+  search.method.print <- search.method
+  if(search.method == "beta"){
+    search.method.print <- "\u03B2"
+  }
 
   if(verbose){
-    cat(method, " method with ", search.method, " in ", iter.level, " level iteration ...\n")
+    cat(method.print, " method with ", search.method.print, " in ", iter.level, " level iteration ...\n")
   }
 
   time.cost <- system.time({
-    if(method == "GDI")
+    if(method == "GDI"){
       Qval.obj <- correctQ.GDI(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model=model, 
                                search.method=search.method, maxitr=maxitr, iter.level=iter.level, eps=eps, verbose=verbose)
-    else if(method == "Wald")
-      Qval.obj <- correctQ.Wald(Y=Y, Q=Q, CDM.obj=CDM.obj, search.method=search.method, 
-                                maxitr=maxitr, eps=eps, alpha.level=alpha.level, verbose=verbose)
-    else if(method == "Hull")
+    }else if(method == "Wald"){
+      Qval.obj <- correctQ.Wald(Y=Y, Q=Q, CDM.obj=CDM.obj, mono.constraint=mono.constraint, search.method=search.method, 
+                                iter.level=iter.level, maxitr=maxitr, eps=eps, alpha.level=alpha.level, verbose=verbose)
+    }else if(method == "Hull"){
       Qval.obj <- correctQ.Hull(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model=model, 
                                 search.method=search.method, maxitr=maxitr, iter.level=iter.level, criter=criter, verbose=verbose)
-    else
+    }else if(method == "MLR-B"){
       Qval.obj <- correctQ.MLR(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model=model, 
-                               search.method=search.method, maxitr=maxitr, verbose=verbose)
+                               search.method=search.method, iter.level=iter.level, maxitr=maxitr, verbose=verbose)
+    }else if(method == "beta"){
+      Qval.obj <- correctQ.beta(Y, Q, CDM.obj, method=par.method, mono.constraint=mono.constraint, model=model, 
+                               search.method=search.method, maxitr=maxitr, iter.level=iter.level, criter=criter, verbose=verbose)
+    }
+      
   })
   
   res <- list(Q.orig = Qval.obj$Q.original, Q.sug = Qval.obj$Q.sug,
-              priority = Qval.obj$priority, Hull.fit = Qval.obj$Hull.fit, 
+              process = Qval.obj$process, priority = Qval.obj$priority, Hull.fit = Qval.obj$Hull.fit, 
               iter = Qval.obj$iter, time.cost = time.cost[1])
   class(res) <- "validation"
 

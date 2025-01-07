@@ -9,9 +9,9 @@
 #' 
 #' @details
 #' \deqn{
-#'    Wald = (\mathbf{R} \times P_{i}(\mathbf{\alpha}))^{'}
+#'    Wald = \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]^{'}
 #'    (\mathbf{R} \times \mathbf{V}_{i} \times \mathbf{R})^{-1}
-#'    (\mathbf{R} \times P_{i}(\mathbf{\alpha}))
+#'    \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]
 #' }
 #' 
 #' @param CDM.obj An object of class \code{CDM.obj}. @seealso \code{\link[Qval]{CDM}}.
@@ -56,6 +56,12 @@
 #' @importFrom MASS ginv
 #' 
 Wald.test <- function(CDM.obj, Q.i, Q.i.k, i=1){
+  
+  if(sum(Q.i) > sum(Q.i.k)){
+    temp <- Q.i
+    Q.i <- Q.i.k
+    Q.i.k <- temp
+  }
   
   GDINA.obj <- CDM.obj$analysis.obj
   Y <- GDINA.obj$Y

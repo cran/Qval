@@ -1,14 +1,14 @@
 # library(rstudioapi)
-# 
+#
 # script_path <- rstudioapi::getActiveDocumentContext()$path
 # print(script_path)
 # working_directory <- dirname(dirname(script_path))
 # setwd(working_directory)
-
-
-# pkgdown::build_site()
 #
 # devtools::document()
+#
+# pkgdown::build_site()
+#
 # devtools::build()
 # devtools::check(manual = TRUE)
 #
@@ -29,9 +29,8 @@
 # which(rownames(pack) == "Qval")
 #
 #
-#
 # library(cranlogs)
-# downloads <- cran_downloads(packages = "Qval", from = "2024-02-04", to = "2024-09-18")
+# downloads <- cran_downloads(packages = "Qval", from = "2024-02-04", to = "2025-01-05")
 # print(downloads)
 # sum(downloads$count)
 

@@ -103,19 +103,19 @@ get.PVAF <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA"){
   rownames(PVAF) <- paste0("item ", 1:I)
 
   if(is.null(CDM.obj))
-      CDM.obj <- CDM(Y, Q, model)
+      CDM.obj <- CDM(Y=Y, Q=Q, model=model)
   alpha.P <- CDM.obj$alpha.P
   P.alpha <- CDM.obj$P.alpha
   alpha <- CDM.obj$alpha
   P.alpha.Xi <- CDM.obj$P.alpha.Xi
 
   for(i in 1:I){
-    P.est <- (colSums(Y[, i] * P.alpha.Xi) + 1e-10) / (colSums(P.alpha.Xi) + 2e-10)
+    P.est <- calculatePEst(Y[, i], P.alpha.Xi)
     P.mean <- sum(P.est * P.alpha)
 
     zeta2 <- rep(-Inf, L)
     for(l in 2:L){
-      P.Xj.alpha <- P.GDINA(pattern[l, ], P.est, pattern, P.alpha)
+      P.Xj.alpha <- P_GDINA(pattern[l, ], P.est, pattern, P.alpha)
       zeta2[l] <- sum((P.Xj.alpha - P.mean)^2 * P.alpha)
     }
     PVAF[i, ] <- zeta2 / zeta2[L]

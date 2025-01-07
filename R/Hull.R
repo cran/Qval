@@ -1,10 +1,11 @@
-
 #'
 #' @importFrom GDINA attributepattern
 #'
-correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, model="GDINA",
+correctQ.Hull <- function(Y, Q, 
+                          CDM.obj=NULL, method="EM", mono.constraint=TRUE, model="GDINA",
                           search.method="ESA", maxitr=1, iter.level="test",
-                          criter="PVAF", verbose = TRUE){
+                          criter="PVAF", 
+                          verbose = TRUE){
 
   N <- nrow(Y)
   I <- nrow(Q)
@@ -15,7 +16,7 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
   Q.Hull <- Q
   Q.pattern.ini <- rep(2, I)
   for(i in 1:I)
-    Q.pattern.ini[i] <- get.Pattern(Q.Hull[i, ], pattern)
+    Q.pattern.ini[i] <- get_Pattern(Q.Hull[i, ], pattern)
   Q.pattern <- Q.pattern.ini
 
   Hull.fit <- list()
@@ -37,28 +38,28 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
     criterion.pre <- criterion.cur <- rep(0, I)
     pattern.criterion <- rep(2, K)
     for(i in 1:I){
-      
-      P.est <- (colSums(Y[, i] * P.alpha.Xi) + 1e-10) / (colSums(P.alpha.Xi) + 2e-10)
+      P.est <- calculatePEst(Y[, i], P.alpha.Xi)
       
       if(criter == "PVAF"){
         P.mean <- sum(P.est * P.alpha)
-        P.Xi.alpha.L <- P.GDINA(rep(1, K), P.est, pattern, P.alpha)
+        P.Xi.alpha.L <- P_GDINA(rep(1, K), P.est, pattern, P.alpha)
         zeta2.i.K <- sum((P.Xi.alpha.L - P.mean)^2 * P.alpha)
 
-        P.Xi.alpha <- P.GDINA(pattern[Q.pattern.ini[i], ], P.est, pattern, P.alpha)
+        P.Xi.alpha <- P_GDINA(pattern[Q.pattern.ini[i], ], P.est, pattern, P.alpha)
         criterion.pre[i] <- criterion.cur[i] <- sum((P.Xi.alpha - P.mean)^2 * P.alpha) / zeta2.i.K
       }else if(criter == "R2"){
         L.X <- rep(0, L)
         L.Xi <- rep(0, N)
-        Y.temp <- matrix(Y[, i], N, L, byrow = FALSE)
         P.i <- mean(Y[, i])
 
         L.X[1] <- sum(log((P.i^Y[, i])*((1-P.i)^(1-Y[, i]))))
 
-        P.Xi.alpha <- P.GDINA(pattern[Q.pattern.ini[i], ], P.est, pattern, P.alpha)
-        P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
-        L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
-        L.X[Q.pattern.ini[i]] <- sum(log(L.Xi))
+        P.Xi.alpha <- P_GDINA(pattern[Q.pattern.ini[i], ], P.est, pattern, P.alpha)
+        L.X[Q.pattern.ini[i]] <- log_likelihood_i(Y[, i], P.Xi.alpha, P.alpha.Xi)
+        # Y.temp <- matrix(Y[, i], N, L, byrow = FALSE)
+        # P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
+        # L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
+        # L.X[Q.pattern.ini[i]] <- sum(log(L.Xi))
 
         criterion.pre[i] <- criterion.cur[i] <- 1- L.X[Q.pattern.ini[i]] / L.X[1]
       }
@@ -69,7 +70,7 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
           zeta2 <- rep(-Inf, K)
           zeta2.cur <- 0
           for(l in 2:L){
-            P.Xi.alpha <- P.GDINA(pattern[l, ], P.est, pattern, P.alpha)
+            P.Xi.alpha <- P_GDINA(pattern[l, ], P.est, pattern, P.alpha)
             zeta2.cur <- sum((P.Xi.alpha - P.mean)^2 * P.alpha)
             if(zeta2.cur > zeta2[sum(pattern[l, ])]){
               zeta2[sum(pattern[l, ])] <- zeta2.cur
@@ -82,10 +83,13 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
           R2 <- rep(-Inf, K)
           R2.cur <- 0
           for(l in 2:L){
-            P.Xi.alpha <- P.GDINA(pattern[l, ], P.est, pattern, P.alpha)
-            P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
-            L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
-            L.X[l] <- sum(log(L.Xi))
+            P.Xi.alpha <- P_GDINA(pattern[l, ], P.est, pattern, P.alpha)
+            L.X[l] <- log_likelihood_i(Y[, i], P.Xi.alpha, P.alpha.Xi)
+            
+            # P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
+            # L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
+            # L.X[l] <- sum(log(L.Xi))
+            
             R2.cur <- 1- L.X[l] / L.X[1]
             if(R2.cur > R2[sum(pattern[l, ])]){
               R2[sum(pattern[l, ])] <- R2.cur
@@ -94,7 +98,7 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
           }
           criterion <- R2
         }
-
+        
         Hull <- rep(-Inf, K-1)
         fjk <- rep(0, K+1)
         npk <- rep(0, K+1)
@@ -136,8 +140,8 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
             Q.i.cur <- Q.i
             if(Q.i[kk] == 0){
               Q.i.cur[kk] <- 1
-              q.possible.cur <- get.Pattern(Q.i.cur, pattern)
-              P.Xi.alpha.cur <- P.GDINA(Q.i.cur, P.est, pattern, P.alpha)
+              q.possible.cur <- get_Pattern(Q.i.cur, pattern)
+              P.Xi.alpha.cur <- P_GDINA(Q.i.cur, P.est, pattern, P.alpha)
               
               if(criter == "PVAF"){
                 PVAF.i.k.cur <- sum((P.Xi.alpha.cur - P.mean)^2 * P.alpha) / zeta2.i.K
@@ -147,9 +151,12 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
                   criterion[sum(Q.i.cur)] <- PVAF.i.k.cur
                 }
               }else if(criter == "R2"){
-                P.Xi.alpha.temp <- matrix(P.Xi.alpha.cur, N, L, byrow = TRUE)
-                L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
-                L.X.cur <- sum(log(L.Xi))
+                L.X.cur <- log_likelihood_i(Y[, i], P.Xi.alpha.cur, P.alpha.Xi)
+                
+                # P.Xi.alpha.temp <- matrix(P.Xi.alpha.cur, N, L, byrow = TRUE)
+                # L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
+                # L.X.cur <- sum(log(L.Xi))
+                
                 R2.i.k.cur <- 1- L.X.cur / L.X[1]
                 if(criterion[sum(Q.i.cur)] < R2.i.k.cur){
                   Q.i.k <- Q.i.cur
@@ -211,20 +218,23 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
           Q.i.cur <- Q.i
           att.posi <- which.max(priority.temp)
           Q.i.cur[att.posi] <- 1
-          q.possible.cur <- get.Pattern(Q.i.cur, pattern)
+          q.possible.cur <- get_Pattern(Q.i.cur, pattern)
           priority.temp[att.posi] <- -Inf
 
-          pattern.criterion[sum(Q.i.cur)] <- get.Pattern(Q.i.cur, pattern)
+          pattern.criterion[sum(Q.i.cur)] <- get_Pattern(Q.i.cur, pattern)
 
           if(criter == "PVAF"){
-            P.Xi.alpha.cur <- P.GDINA(Q.i.cur, P.est, pattern, P.alpha)
+            P.Xi.alpha.cur <- P_GDINA(Q.i.cur, P.est, pattern, P.alpha)
             zeta2.i.k.cur <- sum((P.Xi.alpha.cur - P.mean)^2 * P.alpha)
             fjk <- c(fjk, zeta2.i.k.cur/zeta2.i.K)
           }else if(criter == "R2"){
-            P.Xi.alpha <- P.GDINA(Q.i.cur, P.est, pattern, P.alpha)
-            P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
-            L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
-            L.X[pattern.criterion[sum(Q.i.cur)]] <- sum(log(L.Xi))
+            P.Xi.alpha <- P_GDINA(Q.i.cur, P.est, pattern, P.alpha)
+            L.X[pattern.criterion[sum(Q.i.cur)]] <- log_likelihood_i(Y[, i], P.Xi.alpha, P.alpha.Xi)
+            
+            # P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
+            # L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
+            # L.X[pattern.criterion[sum(Q.i.cur)]] <- sum(log(L.Xi))
+            
             fjk <- c(fjk, 1- L.X[pattern.criterion[sum(Q.i.cur)]] / L.X[1])
           }
           npk <- c(npk, 2^sum(Q.i.cur))
@@ -257,17 +267,18 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
       }
     }
 
-    Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
-    if(iter > 2)
-      if(all(Q.pattern.cur == Q.pattern[nrow(Q.pattern) - 2, ]))
-        break
     validating.items <- which(Q.pattern.ini != Q.pattern.cur)
-    criterion.delta <- abs(criterion.pre - criterion.cur)
+    criterion.delta <- abs(criterion.cur - criterion.pre)
     if(iter.level == "item"){
-      if(sum(criterion.delta) > 0.00010)
+      if(sum(criterion.delta) > 0.00010){
         validating.items <- which.max(criterion.delta)
-      else
+        Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
+        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+      }else{
         validating.items <- integer(0)
+      }
+    }else{
+      Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
     }
 
     change <- 0
@@ -290,9 +301,9 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
       break
     }
     if(verbose){
-      cat(paste0('Iter=', iter, "/", maxitr, ","),
+      cat(paste0('Iter  =', sprintf("%4d", iter), "/", sprintf("%4d", maxitr), ","),
           change, 'items have changed,',
-          paste0(paste0("\u0394 ", criter, "="), formatC(sum(criterion.delta), digits = 5, format = "f")), "\n")
+          paste0(paste0("\u0394", criter, "="), formatC(sum(criterion.delta[validating.items]), digits = 5, format = "f")), "\n")
     }
   }
   if(search.method == "PAA"){
@@ -300,7 +311,8 @@ correctQ.Hull <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE,
     colnames(priority) <- colnames(Q)
   }
 
-  return(list(Q.original = Q, Q.sug = Q.Hull, priority=priority, 
+  return(list(Q.original = Q, Q.sug = Q.Hull, 
+              process = Q.pattern, priority=priority, 
               Hull.fit = Hull.fit, 
               iter = iter - 1))
 

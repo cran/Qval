@@ -54,9 +54,9 @@
 #' }
 #' \deqn{
 #'    \mathbf{\lambda}_{i}^{T} \mathbf{h}(\mathbf{q_{i}}, \mathbf{\alpha_{l}}) =
-#'    \lambda_{i0} + \sum_{k=1}^{K^\ast}\lambda_{ik}\alpha_{lk} +\sum_{k=1}^{K^\ast-1}\sum_{k'=k+1}^{K^\ast}
-#'    \lambda_{ik}\lambda_{ik'}\alpha_{lk}\alpha_{lk'} +
-#'    \cdots + \lambda_{12 \cdots K^\ast}\prod_{k=1}^{K^\ast}\alpha_{lk}
+#'    \lambda_{i0} + \sum_{k=1}^{K^\ast}\lambda_{ik}\alpha_{lk} q_{ik} +\sum_{k=1}^{K^\ast-1}\sum_{k'=k+1}^{K^\ast}
+#'    \lambda_{ik}\lambda_{ik'}\alpha_{lk}\alpha_{lk'} q_{ik} q_{ik'} +
+#'    \cdots + \lambda_{12 \cdots K^\ast}\prod_{k=1}^{K^\ast}\alpha_{lk}q_{ik}
 #' }
 #' Where, \eqn{P(X_{pi}=1|\mathbf{\alpha}_{l})} represents the probability of a subject with attribute mastery
 #' pattern \eqn{\mathbf{\alpha}_{l}}, where \eqn{l=1,2,\cdots,L} and \eqn{L=2^{K^\ast}}, correctly answering
@@ -386,7 +386,7 @@ CDM <- function(Y, Q, model="GDINA", method="EM",
       prior <- prior/sum(prior)
       logprior <- log(prior)
       parm1 <- c(item.parm)
-      maxchg = max(abs(parm1-parm0),na.rm = TRUE)
+      maxchg = max(abs(parm1 - parm0), na.rm = TRUE)
 
       parm0 <- parm1
       itr <- itr + 1
@@ -394,10 +394,10 @@ CDM <- function(Y, Q, model="GDINA", method="EM",
       if(is.infinite(estep$LL))
         stop("-2LL is not finite.",call. = FALSE)
       if(verbose==1L) {
-        cat('\rIter =',itr,' Max. abs. change =',formatC(maxchg,digits = 5, format = "f"),
+        cat('\rIter =', itr, ' Max. abs. change =', formatC(maxchg, digits = 5, format = "f"),
             ' Deviance  =',formatC(-2 * estep$LL,digits = 3, format = "f"),'                                                                                 ')
       }else if (verbose==2L) {
-        cat('Iter =',itr,' Max. abs. change =',formatC(maxchg,digits = 5, format = "f"),
+        cat('Iter =', itr, ' Max. abs. change =', formatC(maxchg, digits = 5, format = "f"),
             ' Deviance  =',formatC(-2 * estep$LL,digits = 3, format = "f"),'                                                                                \n')
       }
 

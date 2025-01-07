@@ -1,7 +1,9 @@
 
 #' @importFrom GDINA attributepattern
-correctQ.MLR <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, model="GDINA",
-                         search.method="ESA", maxitr=20, verbose = TRUE){
+correctQ.MLR <- function(Y, Q, 
+                         CDM.obj=NULL, method="EM", mono.constraint=TRUE, model="GDINA",
+                         search.method="ESA", iter.level = "test", maxitr=20, 
+                         verbose = TRUE){
 
   N <- nrow(Y)
   I <- nrow(Q)
@@ -12,7 +14,7 @@ correctQ.MLR <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
   Q.MLR <- Q
   Q.pattern.ini <- rep(2, I)
   for(i in 1:I)
-    Q.pattern.ini[i] <- get.Pattern(Q.MLR[i, ], pattern)
+    Q.pattern.ini[i] <- get_Pattern(Q.MLR[i, ], pattern)
   Q.pattern <- Q.pattern.ini
 
   iter <- 0
@@ -76,7 +78,7 @@ correctQ.MLR <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
             Q.i.cur <- Q.i
             if(Q.i[kk] == 0){
               Q.i.cur[kk] <- 1
-              q.possible.cur <- get.Pattern(Q.i.cur, pattern)
+              q.possible.cur <- get_Pattern(Q.i.cur, pattern)
 
               MLR.il <- get.MLR(alpha.P, Y[, i], Q.i.cur)
               if(all(MLR.il$p <= 0.01) && all(MLR.il$r > 0)){
@@ -116,7 +118,7 @@ correctQ.MLR <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
           Q.i.cur <- Q.i
           att.posi <- which.max(priority.temp)
           Q.i.cur[att.posi] <- 1
-          possible.vector.cur <- get.Pattern(Q.i.cur, pattern)
+          possible.vector.cur <- get_Pattern(Q.i.cur, pattern)
           priority.temp[att.posi] <- -Inf
 
           MLR.il <- get.MLR(alpha.P, Y[, i], Q.i.cur)
@@ -140,12 +142,19 @@ correctQ.MLR <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
 
     }
 
-    Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
-    if(iter > 2)
-      if(all(Q.pattern.cur == Q.pattern[nrow(Q.pattern) - 2, ]))
-        break
-    fit.index.dif <- fit.index.ini - fit.index.cur
-    validating.items <- which(fit.index.dif != 0)
+    validating.items <- which(Q.pattern.ini != Q.pattern.cur)
+    fit.index.delta <- abs(fit.index.ini - fit.index.cur)
+    if(iter.level == "item"){
+      if(sum(fit.index.delta) > 0.00010){
+        validating.items <- which.max(fit.index.delta)
+        Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
+        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+      }else{
+        validating.items <- integer(0)
+      }
+    }else{
+      Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+    }
 
     change <- 0
     isbreak <- FALSE
@@ -167,7 +176,9 @@ correctQ.MLR <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
       break
     }
     if(verbose){
-      cat(paste0('Iter = ', iter, "/", maxitr, ","), change, 'items have changed', "\n")
+      cat(paste0('Iter  =', sprintf("%4d", iter), "/", sprintf("%4d", maxitr), ","),
+          change, 'items have changed,',
+          paste0("\u0394AIC=", formatC(sum(fit.index.delta[validating.items]), digits = 5, format = "f")), "\n")
     }
   }
   if(search.method == "PAA"){
@@ -175,6 +186,8 @@ correctQ.MLR <- function(Y, Q, CDM.obj=NULL, method="BM", mono.constraint=TRUE, 
     colnames(priority) <- colnames(Q)
   }
 
-  return(list(Q.original = Q, Q.sug = Q.MLR, priority=priority, iter = iter - 1))
+  return(list(Q.original = Q, Q.sug = Q.MLR, 
+              process = Q.pattern, priority=priority, 
+              iter = iter - 1))
 
 }

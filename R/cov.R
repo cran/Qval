@@ -9,7 +9,7 @@ get.cov <- function(Y.i, P.alpha.Xi, P.Xi.alpha.reduced, Q.i.cur, pattern){
 
   pattern.2.order <- rep(1, nrow(pattern.2))
   for(l in 1:nrow(pattern.2))
-    pattern.2.order[l] <- get.Pattern(pattern.2[l, ], pattern.reduced)
+    pattern.2.order[l] <- get_Pattern(pattern.2[l, ], pattern.reduced)
 
   parde <- NULL
   for(l in 1:nrow(pattern.reduced)){
