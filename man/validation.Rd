@@ -17,7 +17,7 @@ validation(
   iter.level = "test",
   eps = 0.95,
   alpha.level = 0.05,
-  criter = "PVAF",
+  criter = NULL,
   verbose = TRUE
 )
 }
@@ -61,7 +61,8 @@ Default = \code{"GDI"}. See details.}
 
 \item{maxitr}{Number of max iterations. Default = \code{1}.}
 
-\item{iter.level}{Can be \code{"item"} level or \code{"test"} level. Default = \code{"test"}. See details.}
+\item{iter.level}{Can be \code{"item"} level, \code{"test.att"} or \code{"test"} level. Default = \code{"test"} and 
+\code{"test.att"} can not for \code{"Wald"} and \code{"MLR-B"}. See details.}
 
 \item{eps}{Cut-off points of \eqn{PVAF}, will work when the method is \code{"GDI"} or \code{"Wald"}.
 Default = \code{0.95}. See details.}
@@ -72,7 +73,7 @@ Default = \code{0.95}. See details.}
 \eqn{R_{McFadden}^2} @seealso \code{\link[Qval]{get.R2}} or \code{'PVAF'} for the proportion of 
 variance accounted for (\eqn{PVAF}) @seealso \code{\link[Qval]{get.PVAF}}. When 
 \code{method = "beta"}, it can be \code{'AIC'}, \code{'BIC'}, \code{'CAIC'} or \code{'SABIC'}.
-Default = \code{"PVAF"}. See details.}
+Default = \code{"PVAF"} for \code{'Hull'} and default = \code{"AIC"} for \code{'beta'}. See details.}
 
 \item{verbose}{Logical indicating to print iterative information or not. Default is \code{TRUE}}
 }
@@ -275,6 +276,9 @@ The steps of the \code{item} level iterative procedure algorithm are as follows:
 }
 When the Q-matrix validation method is \code{'MLR-B'}, \code{'Hull'} when \code{criter = 'R2'} or \code{'beta'}, \eqn{PVAF} is not used. 
 In this case, the criterion for determining which question's index will be replaced is \eqn{AIC}, \eqn{R^2}or \eqn{AIC}, respectively.
+
+\code{test.level = 'test.att'} will use a method called the test-attribute iterative procedure (Najera et al., 2021), which 
+modifies all items in each iteration while following the principle of minimizing changes in the number of attributes.
 
 The steps of the \code{test} level iterative procedure algorithm are as follows:
 \describe{

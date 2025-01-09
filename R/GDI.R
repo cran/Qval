@@ -18,9 +18,11 @@ correctQ.GDI <- function(Y, Q,
   for(i in 1:I)
     Q.pattern.ini[i] <- get_Pattern(Q.GDI[i, ], pattern)
   Q.pattern <- Q.pattern.ini
+  
 
   iter <- 0
   while(iter < maxitr){
+    best.pos <- matrix(NA, I, K)
     iter <- iter + 1
     priority <- NULL
 
@@ -52,13 +54,21 @@ correctQ.GDI <- function(Y, Q,
 
       ######################################## ESA ########################################
       if(search.method == "ESA"){
+        PVAF.K <- rep(-Inf, K)
         zeta2 <- rep(-Inf, L)
         for(l in 2:L){
           P.Xi.alpha <- P_GDINA(pattern[l, ], P.est, pattern, P.alpha)
           zeta2[l] <- sum((P.Xi.alpha - P.mean)^2 * P.alpha)
         }
         PVAF <- zeta2 / zeta2[L]
-
+        for (l in 2:L) {
+          pos <- sum(pattern[l, ])
+          if(PVAF.K[pos] < PVAF[l]){
+            PVAF.K[pos] <- PVAF[l]
+            best.pos[i, pos] <- l
+          }
+        }
+        
         for(l in 2:L){
           if(PVAF[l] >= eps.value){
             Q.pattern.cur[i] <- l
@@ -71,7 +81,7 @@ correctQ.GDI <- function(Y, Q,
       ######################################## SSA ########################################
       if(search.method == "SSA"){
         Q.i <- rep(0, K)
-
+        already <- FALSE
         for(k in 1:K){
           q.possible.k <- NULL
           PVAF.i.k <- -Inf
@@ -93,10 +103,11 @@ correctQ.GDI <- function(Y, Q,
           }
           if(!is.null(q.possible.k)){
             Q.i <- Q.i.k
-            q.possible <- q.possible.k
-            if(PVAF.i.k >= eps.value){
+            best.pos[i, sum(Q.i.k)] <- q.possible.k
+            if(PVAF.i.k >= eps.value && !already){
+              q.possible <- q.possible.k
               PVAF.cur[i] <- PVAF.i.k
-              break
+              already <- TRUE
             }
           }
         }
@@ -128,6 +139,7 @@ correctQ.GDI <- function(Y, Q,
           zeta2.i.k.cur <- sum((P.Xi.alpha.cur - P.mean)^2 * P.alpha)
 
           if (PVAF.i.k < zeta2.i.k.cur/zeta2.i.K) {
+            best.pos[i, sum(Q.i)] <- q.possible.cur
             q.possible <- q.possible.cur
             PVAF.cur[i] <- PVAF.i.k <- zeta2.i.k.cur/zeta2.i.K
             if (PVAF.i.k >= eps.value) {
@@ -139,20 +151,36 @@ correctQ.GDI <- function(Y, Q,
         Q.pattern.cur[i] <- q.possible
       }
     }
-
     
     validating.items <- which(Q.pattern.ini != Q.pattern.cur)
     PVAF.delta <- abs(PVAF.cur - PVAF.pre)
-    if(iter.level == "item"){
-      if(sum(PVAF.delta) > 0.00010){
-        validating.items <- which.max(PVAF.delta)
-        Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
-        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+    if(length(validating.items) > 0){
+      if(iter.level == "test.att"){
+        prov.Q <- pattern[Q.pattern.ini, ]
+        cur.Q <- pattern[Q.pattern.cur, ]
+        Ki.prov <- rowSums(prov.Q[validating.items, , drop = F])
+        Ki.cur <- rowSums(cur.Q[validating.items, , drop = F])
+        
+        att.change <- ifelse(Ki.prov < Ki.cur, 1, ifelse(Ki.prov == Ki.cur, 0, -1))
+        new.att <- Ki.prov + att.change
+        for(vi in length(validating.items)){
+          att.vi <- new.att[vi]
+          while(is.na(best.pos[validating.items[vi], att.vi])) {
+            att.vi <- att.vi - 1
+          }
+          Q.pattern.cur[i] <- best.pos[validating.items[vi], att.vi]
+        }
+      }else if(iter.level == "item"){
+        if(sum(PVAF.delta) > 0.00010){
+          validating.items <- which.max(PVAF.delta)
+          Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
+          Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+        }else{
+          validating.items <- integer(0)
+        }
       }else{
-        validating.items <- integer(0)
+        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
       }
-    }else{
-      Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
     }
 
     change <- 0
@@ -176,8 +204,8 @@ correctQ.GDI <- function(Y, Q,
     }
 
     if(verbose){
-      cat(paste0('Iter  =', sprintf("%4d", iter), "/", sprintf("%4d", maxitr), ","),
-          change, 'items have changed,',
+      cat(paste0('Iter  =', sprintf("%3d", iter), "/", sprintf("%3d", maxitr), ","),
+          sprintf("%3d", change), 'items have changed,',
           paste0("\u0394PVAF=", formatC(sum(PVAF.delta[validating.items]), digits = 5, format = "f")), "\n")
     }
   }

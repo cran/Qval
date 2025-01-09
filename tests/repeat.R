@@ -22,13 +22,12 @@
 #   Y <- data$da
 # 
 #   ## simulate random mis-specifications
-#   MQ <- sim.MQ(Q, 0.2)
+#   MQ <- sim.MQ(Q, 0.1)
 # 
-#   CDM.obj <- CDM(data$dat, MQ)
-#   GDINA.obj <- CDM.obj$analysis.obj
+#   Qval.CDM.obj <- CDM(data$dat, MQ)
 # 
-#   obj1 <- validation(data$dat, MQ, CDM.obj, method = "Wald", search.method = "PAA",  iter.level = "item", maxitr = 30, eps=0.95)
-#   obj2 <- validation(data$dat, MQ, CDM.obj, method = "Wald", search.method = "stepwise", iter.level = "item", maxitr = 30, eps=0.95)
+#   obj1 <- validation(data$dat, MQ, Qval.CDM.obj, method = "Hull", search.method = "SSA", iter.level = "test.att", maxitr = 1)
+#   obj2 <- validation(data$dat, MQ, Qval.CDM.obj, method = "Hull", search.method = "SSA", iter.level = "test", maxitr = 1)
 # 
 #   QRR1 <- QRR1 + zQRR(Q, obj1$Q.sug)
 #   QRR2 <- QRR2 + zQRR(Q, obj2$Q.sug)

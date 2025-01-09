@@ -174,7 +174,10 @@
 #' }
 #' When the Q-matrix validation method is \code{'MLR-B'}, \code{'Hull'} when \code{criter = 'R2'} or \code{'beta'}, \eqn{PVAF} is not used. 
 #' In this case, the criterion for determining which question's index will be replaced is \eqn{AIC}, \eqn{R^2}or \eqn{AIC}, respectively.
-#'
+#' 
+#' \code{test.level = 'test.att'} will use a method called the test-attribute iterative procedure (Najera et al., 2021), which 
+#' modifies all items in each iteration while following the principle of minimizing changes in the number of attributes.
+#' 
 #' The steps of the \code{test} level iterative procedure algorithm are as follows:
 #' \describe{
 #'    \item{Step1}{Fit the \code{CDM} according to the item responses and the provisional Q-matrix (\eqn{\mathbf{Q}^0}).}
@@ -300,7 +303,8 @@
 #'     \item{"beta"}{only for the \code{"beta" method}}
 #'   }
 #' @param maxitr Number of max iterations. Default = \code{1}.
-#' @param iter.level Can be \code{"item"} level or \code{"test"} level. Default = \code{"test"}. See details.
+#' @param iter.level Can be \code{"item"} level, \code{"test.att"} or \code{"test"} level. Default = \code{"test"} and 
+#'                   \code{"test.att"} can not for \code{"Wald"} and \code{"MLR-B"}. See details.
 #' @param eps Cut-off points of \eqn{PVAF}, will work when the method is \code{"GDI"} or \code{"Wald"}.
 #'            Default = \code{0.95}. See details.
 #' @param alpha.level alpha level for the wald test. Default = \code{0.05}
@@ -308,7 +312,7 @@
 #'               \eqn{R_{McFadden}^2} @seealso \code{\link[Qval]{get.R2}} or \code{'PVAF'} for the proportion of 
 #'               variance accounted for (\eqn{PVAF}) @seealso \code{\link[Qval]{get.PVAF}}. When 
 #'               \code{method = "beta"}, it can be \code{'AIC'}, \code{'BIC'}, \code{'CAIC'} or \code{'SABIC'}.
-#'               Default = \code{"PVAF"}. See details.
+#'               Default = \code{"PVAF"} for \code{'Hull'} and default = \code{"AIC"} for \code{'beta'}. See details.
 #' @param verbose Logical indicating to print iterative information or not. Default is \code{TRUE}
 #'
 #' @return
@@ -530,7 +534,7 @@
 validation <- function(Y, Q, 
                        CDM.obj=NULL, par.method="EM", mono.constraint=TRUE, model="GDINA", 
                        method="GDI", search.method="PAA", maxitr=1, iter.level="test",
-                       eps=0.95, alpha.level=0.05, criter = "PVAF", verbose = TRUE){
+                       eps=0.95, alpha.level=0.05, criter = NULL, verbose = TRUE){
   Y <- as.matrix(Y)
   Q <- as.matrix(Q)
 
@@ -554,6 +558,12 @@ validation <- function(Y, Q,
   
   if(all(search.method != c("ESA", "SSA", "PAA", "stepwise", 'beta')))
     stop("method must be one of c('ESA', 'SSA', 'PAA', 'stepwise', 'beta') !")
+  
+  if(all(iter.level != c("test", "test.att", "item")))
+    stop("method must be one of c('test', 'test.att', 'item') !")
+  
+  if(iter.level == "test.att" & (method == "Wald" | method == "MLR-B"))
+    stop("the iterative of 'test.att' can not for 'Wald' and 'MLR-B' for now !")
 
   if(search.method == "ESA")
     if(method == "Wald")
@@ -567,9 +577,21 @@ validation <- function(Y, Q,
     if(method != "beta")
       stop(search.method, " is for \u03B2 method only !")
   
+  if(is.null(criter)){
+    if(method == "Hull"){
+      criter <- "PVAF"
+    }else if(method == "beta"){
+      criter <- "AIC"
+    }
+  }
+  
   if(method == "beta")
     if(all(criter != c("AIC", "BIC", "CAIC", "SABIC")))
       stop("criter must be one of c('AIC', 'BIC', 'CAIC', 'SABIC') when method = 'beta' !")
+  
+  if(method == "Hull")
+    if(all(criter != c("PVAF", "R2")))
+      stop("criter must be one of c('PVAF', 'R2') when method = 'Hull' !")
 
   if(method == "Wald" && model != "GDINA")
     stop("model must be GDINA when method are Wald !")

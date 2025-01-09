@@ -16,7 +16,7 @@ correctQ.MLR <- function(Y, Q,
   for(i in 1:I)
     Q.pattern.ini[i] <- get_Pattern(Q.MLR[i, ], pattern)
   Q.pattern <- Q.pattern.ini
-
+  
   iter <- 0
   while(iter < maxitr){
     iter <- iter + 1
@@ -144,16 +144,18 @@ correctQ.MLR <- function(Y, Q,
 
     validating.items <- which(Q.pattern.ini != Q.pattern.cur)
     fit.index.delta <- abs(fit.index.ini - fit.index.cur)
-    if(iter.level == "item"){
-      if(sum(fit.index.delta) > 0.00010){
-        validating.items <- which.max(fit.index.delta)
-        Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
-        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+    if(length(validating.items) > 0) {
+      if(iter.level == "item"){
+        if(sum(fit.index.delta) > 0.00010){
+          validating.items <- which.max(fit.index.delta)
+          Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
+          Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+        }else{
+          validating.items <- integer(0)
+        }
       }else{
-        validating.items <- integer(0)
+        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
       }
-    }else{
-      Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
     }
 
     change <- 0

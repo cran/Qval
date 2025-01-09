@@ -173,16 +173,18 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE,
 
     validating.items <- which(Q.pattern.ini != Q.pattern.cur)
     PVAF.delta <- abs(PVAF.cur - PVAF.pre)
-    if(iter.level == "item"){
-      if(sum(PVAF.delta) > 0.00010){
-        validating.items <- which.max(PVAF.delta)
-        Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
-        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+    if(length(validating.items) > 0){
+      if(iter.level == "item"){
+        if(sum(PVAF.delta) > 0.00010){
+          validating.items <- which.max(PVAF.delta)
+          Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
+          Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+        }else{
+          validating.items <- integer(0)
+        }
       }else{
-        validating.items <- integer(0)
+        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
       }
-    }else{
-      Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
     }
     
     change <- 0

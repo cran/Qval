@@ -18,12 +18,13 @@ correctQ.Hull <- function(Y, Q,
   for(i in 1:I)
     Q.pattern.ini[i] <- get_Pattern(Q.Hull[i, ], pattern)
   Q.pattern <- Q.pattern.ini
-
+  
   Hull.fit <- list()
   class(Hull.fit) <- "Hull"
   
   iter <- 0
   while(iter < maxitr){
+    best.pos <- matrix(NA, I, K)
     iter <- iter + 1
     priority <- NULL
 
@@ -56,10 +57,6 @@ correctQ.Hull <- function(Y, Q,
 
         P.Xi.alpha <- P_GDINA(pattern[Q.pattern.ini[i], ], P.est, pattern, P.alpha)
         L.X[Q.pattern.ini[i]] <- log_likelihood_i(Y[, i], P.Xi.alpha, P.alpha.Xi)
-        # Y.temp <- matrix(Y[, i], N, L, byrow = FALSE)
-        # P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
-        # L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
-        # L.X[Q.pattern.ini[i]] <- sum(log(L.Xi))
 
         criterion.pre[i] <- criterion.cur[i] <- 1- L.X[Q.pattern.ini[i]] / L.X[1]
       }
@@ -74,7 +71,7 @@ correctQ.Hull <- function(Y, Q,
             zeta2.cur <- sum((P.Xi.alpha - P.mean)^2 * P.alpha)
             if(zeta2.cur > zeta2[sum(pattern[l, ])]){
               zeta2[sum(pattern[l, ])] <- zeta2.cur
-              pattern.criterion[sum(pattern[l, ])] <- l
+              best.pos[i, sum(pattern[l, ])] <- pattern.criterion[sum(pattern[l, ])] <- l
             }
           }
           criterion <- zeta2 / zeta2[K]
@@ -85,15 +82,11 @@ correctQ.Hull <- function(Y, Q,
           for(l in 2:L){
             P.Xi.alpha <- P_GDINA(pattern[l, ], P.est, pattern, P.alpha)
             L.X[l] <- log_likelihood_i(Y[, i], P.Xi.alpha, P.alpha.Xi)
-            
-            # P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
-            # L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
-            # L.X[l] <- sum(log(L.Xi))
-            
+
             R2.cur <- 1- L.X[l] / L.X[1]
             if(R2.cur > R2[sum(pattern[l, ])]){
               R2[sum(pattern[l, ])] <- R2.cur
-              pattern.criterion[sum(pattern[l, ])] <- l
+              best.pos[i, sum(pattern[l, ])] <- pattern.criterion[sum(pattern[l, ])] <- l
             }
           }
           criterion <- R2
@@ -147,20 +140,16 @@ correctQ.Hull <- function(Y, Q,
                 PVAF.i.k.cur <- sum((P.Xi.alpha.cur - P.mean)^2 * P.alpha) / zeta2.i.K
                 if(criterion[sum(Q.i.cur)] < PVAF.i.k.cur){
                   Q.i.k <- Q.i.cur
-                  pattern.criterion[sum(Q.i.cur)] <- q.possible.cur
+                  best.pos[i, sum(Q.i.cur)] <- pattern.criterion[sum(Q.i.cur)] <- q.possible.cur
                   criterion[sum(Q.i.cur)] <- PVAF.i.k.cur
                 }
               }else if(criter == "R2"){
                 L.X.cur <- log_likelihood_i(Y[, i], P.Xi.alpha.cur, P.alpha.Xi)
-                
-                # P.Xi.alpha.temp <- matrix(P.Xi.alpha.cur, N, L, byrow = TRUE)
-                # L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
-                # L.X.cur <- sum(log(L.Xi))
-                
+
                 R2.i.k.cur <- 1- L.X.cur / L.X[1]
                 if(criterion[sum(Q.i.cur)] < R2.i.k.cur){
                   Q.i.k <- Q.i.cur
-                  pattern.criterion[sum(Q.i.cur)] <- q.possible.cur
+                  best.pos[i, sum(Q.i.cur)] <- pattern.criterion[sum(Q.i.cur)] <- q.possible.cur
                   criterion[sum(Q.i.cur)] <- R2.i.k.cur
                 }
               }
@@ -221,7 +210,7 @@ correctQ.Hull <- function(Y, Q,
           q.possible.cur <- get_Pattern(Q.i.cur, pattern)
           priority.temp[att.posi] <- -Inf
 
-          pattern.criterion[sum(Q.i.cur)] <- get_Pattern(Q.i.cur, pattern)
+          best.pos[i, sum(Q.i.cur)] <- pattern.criterion[sum(Q.i.cur)] <- get_Pattern(Q.i.cur, pattern)
 
           if(criter == "PVAF"){
             P.Xi.alpha.cur <- P_GDINA(Q.i.cur, P.est, pattern, P.alpha)
@@ -230,11 +219,7 @@ correctQ.Hull <- function(Y, Q,
           }else if(criter == "R2"){
             P.Xi.alpha <- P_GDINA(Q.i.cur, P.est, pattern, P.alpha)
             L.X[pattern.criterion[sum(Q.i.cur)]] <- log_likelihood_i(Y[, i], P.Xi.alpha, P.alpha.Xi)
-            
-            # P.Xi.alpha.temp <- matrix(P.Xi.alpha, N, L, byrow = TRUE)
-            # L.Xi <- rowSums(P.alpha.Xi*(P.Xi.alpha.temp^Y.temp)*((1-P.Xi.alpha.temp)^(1-Y.temp)))
-            # L.X[pattern.criterion[sum(Q.i.cur)]] <- sum(log(L.Xi))
-            
+
             fjk <- c(fjk, 1- L.X[pattern.criterion[sum(Q.i.cur)]] / L.X[1])
           }
           npk <- c(npk, 2^sum(Q.i.cur))
@@ -269,16 +254,33 @@ correctQ.Hull <- function(Y, Q,
 
     validating.items <- which(Q.pattern.ini != Q.pattern.cur)
     criterion.delta <- abs(criterion.cur - criterion.pre)
-    if(iter.level == "item"){
-      if(sum(criterion.delta) > 0.00010){
-        validating.items <- which.max(criterion.delta)
-        Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
-        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+    if(length(validating.items) > 0){
+      if(iter.level == "test.att"){
+        prov.Q <- pattern[Q.pattern.ini, ]
+        cur.Q <- pattern[Q.pattern.cur, ]
+        Ki.prov <- rowSums(prov.Q[validating.items, , drop = F])
+        Ki.cur <- rowSums(cur.Q[validating.items, , drop = F])
+        
+        att.change <- ifelse(Ki.prov < Ki.cur, 1, ifelse(Ki.prov == Ki.cur, 0, -1))
+        new.att <- Ki.prov + att.change
+        for(vi in length(validating.items)){
+          att.vi <- new.att[vi]
+          while(is.na(best.pos[validating.items[vi], att.vi])) {
+            att.vi <- att.vi - 1
+          }
+          Q.pattern.cur[i] <- best.pos[validating.items[vi], att.vi]
+        }
+      }else if(iter.level == "item"){
+        if(sum(criterion.delta) > 0.00010){
+          validating.items <- which.max(criterion.delta)
+          Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
+          Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+        }else{
+          validating.items <- integer(0)
+        }
       }else{
-        validating.items <- integer(0)
+        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
       }
-    }else{
-      Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
     }
 
     change <- 0

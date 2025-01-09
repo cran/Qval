@@ -1,3 +1,8 @@
+# Qval 1.1.1
+
+-   Added   - A search algorithm for 'test.att' has been added for `GDI`, `Hull`, and `beta`.
+
+
 # Qval 1.1.0
 
 -   Added   - Added the URL of the online manual to the `DESCRIPTION` field.

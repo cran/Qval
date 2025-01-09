@@ -23,13 +23,13 @@
 # 
 # ## using MMLE/EM to fit CDM model first
 # example.CDM.obj <- CDM(example.data$dat, example.MQ, model = model)
-# # GDINA.obj <- example.CDM.obj$analysis.obj
+# fit <- GDINA.obj <- example.CDM.obj$analysis.obj
 # #
-# Q.beta.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, method = "beta", search.method = "PAA", criter="AIC", iter.level = "item", maxitr = 10)
-# # Q.beta.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, method = "beta", search.method = "PAA", criter="BIC", iter.level = "item", maxitr = 20)
+# Q.beta.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, method = "beta", search.method = "beta", criter="AIC", iter.level = "test.att", maxitr = 1)
+# # Q.beta.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, method = "beta", search.method = "beta", criter="BIC", iter.level = "test", maxitr = 20)
 # print(zQRR(example.Q, Q.beta.obj$Q.sug))
 # #
-# # Q.GDI.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, model = model, method = "GDI", iter.level = "test", maxitr = 3)
+# # Q.GDI.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, model = model, method = "GDI", search.method="ESA", iter.level = "test.att", maxitr = 1)
 # # Q.GDI.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, model = model, method = "GDI", iter.level = "item", maxitr = 150)
 # # print(zQRR(example.Q, Q.GDI.obj$Q.sug))
 # #

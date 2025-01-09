@@ -1,4 +1,3 @@
-# library(rstudioapi)
 #
 # script_path <- rstudioapi::getActiveDocumentContext()$path
 # print(script_path)

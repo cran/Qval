@@ -19,7 +19,8 @@ correctQ.beta <- function(Y, Q,
   for(i in 1:I)
     Q.pattern.ini[i] <- get_Pattern(Q.beta[i, ], pattern)
   Q.pattern <- Q.pattern.ini
-  
+
+  best.pos <- NULL
   mod0 <- NULL
   
   iter <- 0
@@ -41,8 +42,6 @@ correctQ.beta <- function(Y, Q,
     beta_Ni_ri.obj <- beta_Ni_ri(pattern, AMP, Y)
     ri <- beta_Ni_ri.obj$ri
     Ni <- beta_Ni_ri.obj$Ni
-
-    
 
     QvalEnv <- new.env()
     assign("Y", Y, envir = QvalEnv)
@@ -69,7 +68,9 @@ correctQ.beta <- function(Y, Q,
     clusterExport(cl, c("Y", "P.alpha.Xi", "P.alpha", "pattern", "ri", "Ni", "Q.pattern.ini", "model", "criter",
                         "search.method", "P_GDINA", "Q.beta", "L", "K", "alpha.P", "get.MLRlasso", "priority"),
                   envir = QvalEnv) 
-     results <- parLapply(cl, 1:I, fun = parallel_iter, Y = get("Y", envir = QvalEnv),
+    results <- parLapply(cl, 1:I, 
+                         fun = get("parallel_iter", envir = QvalEnv), 
+                         Y = get("Y", envir = QvalEnv),
                          P.alpha.Xi = get("P.alpha.Xi", envir = QvalEnv),
                          P.alpha = get("P.alpha", envir = QvalEnv),
                          pattern = get("pattern", envir = QvalEnv),
@@ -93,20 +94,38 @@ correctQ.beta <- function(Y, Q,
       fit.index.cur[i] <- results[[i]]$fit.index.cur
       Q.pattern.cur[i] <- results[[i]]$Q.pattern.cur
       priority <- rbind(priority, results[[i]]$priority)
+      best.pos <- rbind(best.pos, results[[i]]$best.pos.i)
     }
     
     validating.items <- which(Q.pattern.ini != Q.pattern.cur)
     fit.index.delta <- abs(fit.index.cur - fit.index.pre)
-    if(iter.level == "item"){
-      if(max(fit.index.delta) > 0.00010){
-        validating.items <- which.max(fit.index.delta)
-        Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
-        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+    if(length(validating.items) > 0) {
+      if(iter.level == "test.att"){
+        prov.Q <- pattern[Q.pattern.ini, ]
+        cur.Q <- pattern[Q.pattern.cur, ]
+        Ki.prov <- rowSums(prov.Q[validating.items, , drop = F])
+        Ki.cur <- rowSums(cur.Q[validating.items, , drop = F])
+        
+        att.change <- ifelse(Ki.prov < Ki.cur, 1, ifelse(Ki.prov == Ki.cur, 0, -1))
+        new.att <- Ki.prov + att.change
+        for(vi in length(validating.items)){
+          att.vi <- new.att[vi]
+          while(is.na(best.pos[validating.items[vi], att.vi])) {
+            att.vi <- att.vi - 1
+          }
+          Q.pattern.cur[i] <- best.pos[validating.items[vi], att.vi]
+        }
+      }else if(iter.level == "item"){
+        if(max(fit.index.delta) > 0.00010){
+          validating.items <- which.max(fit.index.delta)
+          Q.pattern.cur[-validating.items] <- Q.pattern.ini[-validating.items]
+          Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
+        }else{
+          validating.items <- integer(0)
+        }
       }else{
-        validating.items <- integer(0)
+        Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
       }
-    }else{
-      Q.pattern <- rbind(Q.pattern, Q.pattern.cur)
     }
     
     change <- 0
@@ -182,13 +201,17 @@ correctQ.beta <- function(Y, Q,
 #' @export
 parallel_iter <- function(i, Y, P.alpha.Xi, P.alpha, pattern, ri, Ni, 
                           Q.pattern.ini, model, criter, search.method, 
-                          P_GDINA, Q.beta, L, K, alpha.P, get.MLRlasso, priority) {
+                          P_GDINA, Q.beta, L, K, alpha.P, get.MLRlasso, 
+                          priority) {
   result <- list()
+  best.pos.i <- rep(NA, K)
+  fit.index.K <- rep(Inf, K)
   
   q.possible <- 2
   P.est <- calculatePEst(Y[, i], P.alpha.Xi)
   mod0 <- GDINA(Y, pattern[Q.pattern.ini, ], model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))
   
+  best.pos.i[sum(pattern[Q.pattern.ini[i], ])] <- get_Pattern(pattern[Q.pattern.ini[i], ], pattern)
   if (criter == "AIC") {
     result$fit.index.pre <- mod0$testfit$AIC
     result$fit.index.cur <- mod0$testfit$AIC
@@ -213,6 +236,7 @@ parallel_iter <- function(i, Y, P.alpha.Xi, P.alpha, pattern, ri, Ni,
       value[is.nan(value) | is.infinite(value)] <- 0
       beta[k] <- sum(value)
     }
+    best.pos.i[1] <- which.max(beta) + 1
     
     att.max <- which.max(beta)
     att.min <- which.min(beta)
@@ -233,13 +257,17 @@ parallel_iter <- function(i, Y, P.alpha.Xi, P.alpha, pattern, ri, Ni,
       } else if (criter == "SABIC") {
         fit.index.temp[l] <- mod0$testfit$SABIC
       }
+      
+      if(fit.index.K[sum(pattern[pattern.search[l], ])] > fit.index.temp[l]){
+        best.pos.i[sum(pattern[pattern.search[l], ])] <- l
+        fit.index.K[sum(pattern[pattern.search[l], ])] <- fit.index.temp[l]
+      }
     }
     
     q.possible <- pattern.search[which.min(fit.index.temp)]
     result$fit.index.cur <- fit.index.temp[which.min(fit.index.temp)]
-    result$Q.pattern.cur <- q.possible
   }
-  
+
   ######################################## ESA ########################################
   if (search.method == "ESA") {
     fit.index.i <- rep(Inf, L)
@@ -258,13 +286,17 @@ parallel_iter <- function(i, Y, P.alpha.Xi, P.alpha, pattern, ri, Ni,
       } else if (criter == "SABIC") {
         fit.index.i[l] <- mod0$testfit$SABIC
       }
+      
+      if(fit.index.K[sum(pattern[l, ])] > fit.index.i[l]){
+        best.pos.i[sum(pattern[l, ])] <- l
+        fit.index.K[sum(pattern[l, ])] <- fit.index.i[l]
+      }
     }
     
     q.possible <- which.min(fit.index.i)
     result$fit.index.cur <- fit.index.i[q.possible]
-    result$Q.pattern.cur <- q.possible
   }
-  
+
   ######################################## SSA ########################################
   if (search.method == "SSA") {
     Q.i <- rep(0, K)
@@ -306,13 +338,13 @@ parallel_iter <- function(i, Y, P.alpha.Xi, P.alpha, pattern, ri, Ni,
           Q.i <- Q.i.k
           q.possible <- q.possible.k
           fit.index.i <- fit.index.i.k
+          best.pos.i[sum(Q.i)] <- q.possible.k
         }
       }
     }
-    result$Q.pattern.cur <- q.possible
     result$fit.index.cur <- fit.index.i
   }
-  
+
   ######################################## PAA ########################################
   if (search.method == "PAA") {
     priority.cur <- get.MLRlasso(alpha.P, Y[, i])
@@ -347,16 +379,17 @@ parallel_iter <- function(i, Y, P.alpha.Xi, P.alpha, pattern, ri, Ni,
       } else if (criter == "SABIC") {
         fit.index.i.k.temp <- mod0$testfit$SABIC
       }
+      best.pos.i[sum(Q.i)] <- q.possible.cur
       
       if (fit.index.i.k > fit.index.i.k.temp) {
         fit.index.i.k <- fit.index.i.k.temp
         q.possible <- q.possible.cur
       }
     }
-    
-    result$Q.pattern.cur <- q.possible
     result$fit.index.cur <- fit.index.i.k
   }
+  result$Q.pattern.cur <- q.possible
+  result$best.pos.i <- best.pos.i
   
   return(result)
 }
