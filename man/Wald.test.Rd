@@ -2,23 +2,26 @@
 % Please edit documentation in R/Wald.test.R
 \name{Wald.test}
 \alias{Wald.test}
-\title{Wald.test for two q-vecotrs}
+\title{the Wald test for two q-vectors}
 \usage{
-Wald.test(CDM.obj, Q.i, Q.i.k, i = 1)
+Wald.test(CDM.obj, q1, q2, i = 1)
 }
 \arguments{
 \item{CDM.obj}{An object of class \code{CDM.obj}. @seealso \code{\link[Qval]{CDM}}.}
 
-\item{Q.i}{A q-vector}
+\item{q1}{A q-vector}
 
-\item{Q.i.k}{Another q-vector}
+\item{q2}{Another q-vector}
 
-\item{i}{the item you focusing on}
+\item{i}{the item needed to be validated}
 }
 \value{
-An object of class \code{list} containing the following components:
-\item{Wald.statistic}{The statistic of the Wald test.}
-\item{p.value}{The p value}
+An object of class \code{htest} containing the following components:
+\describe{
+ \item{statistic}{The statistic of the Wald test.}
+ \item{parameter}{the degrees of freedom for the Wald-statistic.}
+ \item{p.value}{The p value}
+}
 }
 \description{
 This function flexibly provides the Wald test for any two q-vectors of a given item in the Q-matrix, 
@@ -33,7 +36,7 @@ to accept a \code{CDM.obj}.
 }
 }
 \examples{
-
+library(Qval)
 set.seed(123)
 
 K <- 3
@@ -48,12 +51,12 @@ data <- sim.data(Q = Q, N = N, IQ = IQ, model = "GDINA", distribute = "horder")
 
 CDM.obj <- CDM(data$dat, Q)
 
-Q.i <- c(1, 0, 0)
-Q.i.k <- c(1, 1, 0)
+q1 <- c(1, 0, 0)
+q2 <- c(1, 1, 0)
 
 ## Discuss whether there is a significant difference when 
-## the q-vector of the 2nd item in the Q-matrix is Q.i or Q.i.k.
-Wald.test.obj <- Wald.test(CDM.obj, Q.i, Q.i.k, i=2)
+## the q-vector of the 2nd item in the Q-matrix is q1 or q2.
+Wald.test.obj <- Wald.test(CDM.obj, q1, q2, i=2)
 
 print(Wald.test.obj)
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim.data.R
 \name{sim.data}
 \alias{sim.data}
-\title{generate response data}
+\title{generate response}
 \usage{
 sim.data(
   Q = NULL,
@@ -15,11 +15,14 @@ sim.data(
 )
 }
 \arguments{
-\item{Q}{The Q-matrix. A random 30 × 5 Q-matrix (\code{\link[Qval]{sim.Q}}) will be used if NULL.}
+\item{Q}{The Q-matrix. A random 30 × 5 Q-matrix (\code{\link[Qval]{sim.Q}}) will be used if \code{Q = NULL}.}
 
 \item{N}{Sample size. Default = 500.}
 
-\item{IQ}{A List contains tow I-length vectors: \code{P0} and \code{P1}.}
+\item{IQ}{A list containing two \eqn{I}-length vectors: \code{P0} and \code{P1}.
+\code{P0} represents the probability of examinees who have not mastered any attributes  
+(\eqn{[00...0]}) correctly answering the item, while \code{P1} represents the probability  
+of examinees who have mastered all attributes (\eqn{[11...1]}) correctly answering the item.}
 
 \item{model}{Type of model to be fitted; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"},
 \code{"ACDM"}, \code{"LLM"}, or \code{"rRUM"}.}
@@ -35,7 +38,7 @@ sim.data(
     \item \code{cutoffs}  A vector giving the cutoff for each attribute when \code{distribute = "mvnorm"}.
                          Default = \eqn{k/(1+K)} (Chiu, Douglas, & Li, 2009).
     \item \code{theta} A vector of length N representing the higher-order ability for each examinee.
-                      By default, generate randomly from the normal distribution (Tu et al, 2022).
+                      By default, generate randomly from the standard normal distribution (Tu et al, 2022).
     \item \code{a} The slopes for the higher-order model when \code{distribute = "horder"}.
                   Default = 1.5 (Tu et al, 2022).
     \item \code{b} The intercepts when \code{distribute = "horder"}. By default, select equally spaced
@@ -45,20 +48,22 @@ sim.data(
 \item{verbose}{Logical indicating to print information or not. Default is \code{TRUE}}
 }
 \value{
-Object of class \code{simGDINA}.
-An \code{simGDINA} object gained by \code{simGDINA} function form \code{GDINA} package.
+Object of class \code{sim.data}.
+An \code{sim.data} object initially gained by \code{\link[GDINA]{simGDINA}} function form \code{GDINA} package.
 Elements that can be extracted using method extract include:
-\item{dat}{An \code{N} × \code{I} simulated item response matrix.}
-\item{Q}{The Q-matrix.}
-\item{attribute}{An \code{N} × \code{K} matrix for inviduals' attribute patterns.}
-\item{catprob.parm}{A list of non-zero category success probabilities for each latent group.}
-\item{delta.parm}{A list of delta parameters.}
-\item{higher.order.parm}{Higher-order parameters.}
-\item{mvnorm.parm}{Multivariate normal distribution parameters.}
-\item{LCprob.parm}{A matrix of item/category success probabilities for each latent class.}
+\describe{
+ \item{dat}{An \code{N} × \code{I} simulated item response matrix.}
+ \item{Q}{The Q-matrix.}
+ \item{attribute}{An \code{N} × \code{K} matrix for inviduals' attribute patterns.}
+ \item{catprob.parm}{A list of non-zero success probabilities for each attribute mastery pattern.}
+ \item{delta.parm}{A list of delta parameters.}
+ \item{higher.order.parm}{Higher-order parameters.}
+ \item{mvnorm.parm}{Multivariate normal distribution parameters.}
+ \item{LCprob.parm}{A matrix of success probabilities for each attribute mastery pattern.}
+}
 }
 \description{
-randomly generate response data matrix according to certen conditions,
+randomly generate response matrix according to certain conditions,
 including attributes distribution, item quality, sample size, Q-matrix and cognitive diagnosis models (CDMs).
 }
 \examples{

@@ -1,15 +1,16 @@
 #' Calculate \eqn{PVAF}
 #'
 #' @description
-#' The function is able to caculate the proportion of variance accounted for (\eqn{PVAF}) for all items
+#' The function is able to calculate the proportion of variance accounted for (\eqn{PVAF}) for all items
 #' after fitting \code{CDM} or directly.
 #'
-#' @param Y A required \code{N} × \code{I} matrix or data.frame consisting of the responses of \code{N} individuals
-#'          to \code{I} items. Missing values should be coded as \code{NA}.
-#' @param Q A required binary \code{I} × \code{K} matrix containing the attributes not required or required, coded
-#'          as 0 or 1, to master the items. The \code{i}th row of the matrix is a binary indicator vector indicating
-#'          which attributes are not required (coded as 0) and which attributes are required (coded as 1) to master item \code{i}.
-#' @param CDM.obj An object of class \code{CDM.obj}. Can can be NULL, but when it is not NULL, it enables
+#' @param Y A required \eqn{N} × \eqn{I} matrix or \code{data.frame} consisting of the responses of \code{N} individuals
+#'          to \eqn{N} × \eqn{I} items. Missing values need to be coded as \code{NA}.
+#' @param Q A required binary \eqn{I} × \eqn{K} matrix containing the attributes not required or required 
+#'          master the items. The \code{i}th row of the matrix is a binary indicator vector indicating which
+#'          attributes are not required (coded by 0) and which attributes are required (coded by 1) to master
+#'          item \eqn{i}.
+#' @param CDM.obj An object of class \code{CDM.obj}. Can can be \code{NULL}, but when it is not \code{NULL}, it enables
 #'                rapid verification of the Q-matrix without the need for parameter estimation.
 #'                @seealso \code{\link[Qval]{CDM}}.
 #' @param model Type of model to be fitted; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"},
@@ -21,25 +22,26 @@
 #'  item \eqn{i}, which can be computed as:
 #'  \deqn{
 #'  \zeta^2 =
-#'  \sum_{l=1}^{2^K} \pi_{l}{(P(X_{pi}=1|\mathbf{\alpha}_{l}) - P_{i}^{mean})}^2
+#'  \sum_{l=1}^{2^K} \pi_{l}{(P(X_{pi}=1|\boldsymbol{\alpha}_{l}) - \bar{P}_{i})}^2
 #' }
 #' where \eqn{\pi_{l}} represents the prior probability of mastery pattern \eqn{l};
-#' \eqn{P_{i}^{mean}=\sum_{k=1}^{2^K}\pi_{l}P(X_{pi}=1|\mathbf{\alpha}_{l})} is the weighted average of the correct
+#' \eqn{\bar{P}_{i}=\sum_{k=1}^{2^K}\pi_{l}P(X_{pi}=1|\boldsymbol{\alpha}_{l})} is the weighted average of the correct
 #' response probabilities across all attribute mastery patterns. When the q-vector
 #' is correctly specified, the calculated \eqn{\zeta^2} should be maximized, indicating
 #' the maximum discrimination of the item.
 #'
-#' Theoretically, \eqn{\zeta^{2}} is larger when \eqn{\mathbf{q}_{i}} is either specified correctly or over-specified,
-#' unlike when \eqn{\mathbf{q}_{i}} is under-specified, and that when \eqn{\mathbf{q}_{i}} is over-specified, \eqn{\zeta^{2}}
-#' is larger than but close to the value of \eqn{\mathbf{q}_{i}} when specified correctly. The value of \eqn{\zeta^{2}} continues to
-#' increase slightly as the number of over-specified attributes increases, until \eqn{\mathbf{q}_{i}} becomes \eqn{\mathbf{q}_{i1:K}}.
-#' Thus, \eqn{\zeta^{2} / \zeta_{max}^{2}} is computed to indicate the proportion of variance accounted for by \eqn{\mathbf{q}_{i}}
-#' , called the \eqn{PVAF}.
+#' Theoretically, \eqn{\zeta^{2}} is larger when \eqn{\boldsymbol{q}_{i}} is either specified correctly or over-specified,
+#' unlike when \eqn{\boldsymbol{q}_{i}} is under-specified, and that when \eqn{\boldsymbol{q}_{i}} is over-specified, \eqn{\zeta^{2}}
+#' is larger than but close to the value of \eqn{\boldsymbol{q}_{i}} when specified correctly. The value of \eqn{\zeta^{2}} continues to
+#' increase slightly as the number of over-specified attributes increases, until \eqn{\boldsymbol{q}_{i}} becomes \eqn{\boldsymbol{q}_{i1:K}} 
+#' (\eqn{\boldsymbol{q}_{i1:K}} = [11...1]).
+#' Thus, \eqn{\zeta^{2} / \zeta_{max}^{2}} is computed to indicate the proportion of variance accounted for by \eqn{\boldsymbol{q}_{i}}, 
+#' called the \eqn{PVAF}.
 #'
 #' @seealso \code{\link[Qval]{validation}}
 #'
 #' @return
-#' An object of class \code{matrix}, which consisted of \eqn{PVAF} for each item and each possible attribute mastery pattern.
+#' An object of class \code{matrix}, which consisted of \eqn{PVAF} for each item and each possible q-vector.
 #'
 #' @author
 #' Haijiang Qin <Haijiang133@outlook.com>
@@ -66,7 +68,7 @@
 #' PVAF <-get.PVAF(Y = example.data$dat, Q = example.Q)
 #' print(PVAF)
 #'
-#' ## caculate PVAF after fitting CDM
+#' ## calculate PVAF after fitting CDM
 #' example.CDM.obj <- CDM(example.data$dat, example.Q, model="GDINA")
 #' PVAF <-get.PVAF(CDM.obj = example.CDM.obj)
 #' print(PVAF)
@@ -94,11 +96,14 @@ get.PVAF <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA"){
     N <- nrow(Y)
   }
 
-  PVAF <-matrix(NA, I, L)
+  # Create PVAF matrix
+  PVAF <- matrix(NA, I, L)
+  
+  # Generate pattern names efficiently using apply and paste
   pattern <- attributepattern(K)
-  pattern.names <- pattern[, 1]
-  for(k in 2:K)
-    pattern.names <- paste0(pattern.names, pattern[, k])
+  pattern.names <- apply(pattern, 1, paste0, collapse = "")
+  
+  # Assign column and row names
   colnames(PVAF) <- pattern.names
   rownames(PVAF) <- paste0("item ", 1:I)
 
@@ -113,11 +118,8 @@ get.PVAF <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA"){
     P.est <- calculatePEst(Y[, i], P.alpha.Xi)
     P.mean <- sum(P.est * P.alpha)
 
-    zeta2 <- rep(-Inf, L)
-    for(l in 2:L){
-      P.Xj.alpha <- P_GDINA(pattern[l, ], P.est, pattern, P.alpha)
-      zeta2[l] <- sum((P.Xj.alpha - P.mean)^2 * P.alpha)
-    }
+    P.Xi.alpha <- sapply(2:L, function(l) P_GDINA(pattern[l, ], P.est, pattern, P.alpha))
+    zeta2 <- c(0, apply(P.Xi.alpha, 2, function(x) sum((x - P.mean)^2 * P.alpha)))
     PVAF[i, ] <- zeta2 / zeta2[L]
   }
 

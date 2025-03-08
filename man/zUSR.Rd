@@ -2,28 +2,28 @@
 % Please edit documentation in R/Qvalindex.R
 \name{zUSR}
 \alias{zUSR}
-\title{Caculate under-specifcation rate (USR)}
+\title{Calculate under-specifcation rate (USR)}
 \usage{
 zUSR(Q.true, Q.sug)
 }
 \arguments{
 \item{Q.true}{The true Q-matrix.}
 
-\item{Q.sug}{A The Q-matrix that has being validated.}
+\item{Q.sug}{The Q-matrix that has being validated.}
 }
 \value{
 A numeric (USR index).
 }
 \description{
-Caculate under-specifcation rate (USR)
+Calculate under-specifcation rate (USR)
 }
 \details{
 The USR is defned as:
 \deqn{
  USR = \frac{\sum_{i=1}^{I}\sum_{k=1}^{K}I(q_{ik}^{t} > q_{ik}^{s})}{I × K}
 }
-where \eqn{q_{ik}^{t}} denotes the \code{k}th attribute of item \code{i} in the true Q-matrix (\code{Q.true}),
-\eqn{q_{ik}^{s}} denotes \code{k}th attribute of item \code{i} in the suggested Q-matrix(\code{Q.sug}),
+where \eqn{q_{ik}^{t}} denotes the \eqn{k}th attribute of item \eqn{i} in the true Q-matrix (\code{Q.true}),
+\eqn{q_{ik}^{s}} denotes \eqn{k}th attribute of item \eqn{i} in the suggested Q-matrix(\code{Q.sug}),
 and \eqn{I(\cdot)} is the indicator function.
 }
 \examples{

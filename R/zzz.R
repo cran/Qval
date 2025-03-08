@@ -4,9 +4,6 @@
 }
 
 .onLoad <- function(libname, pkgname) {
-  if (!requireNamespace("GDINA", quietly = TRUE)) {
-    stop("GDINA package is required but not installed. Please install it first.", call. = FALSE)
-  }
 
   GDINA_env <- asNamespace("GDINA")
 
@@ -17,7 +14,6 @@
   inverse_crossprod <- get("inverse_crossprod", envir = GDINA_env)
   score_pj <- get("score_pj", envir = GDINA_env)
   
-
   assign("l2m", l2m, envir = asNamespace(pkgname))
   assign("partial_order2", partial_order2, envir = asNamespace(pkgname))
   assign("LikNR", LikNR, envir = asNamespace(pkgname))

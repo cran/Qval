@@ -6,8 +6,8 @@
 #' This function returns the restriction matrix (de la Torre, 2011; Ma & de la Torre, 2020) based on two q-vectors, 
 #' where the two q-vectors can only differ by one attribute.
 #' 
-#' @param Q.i A q-vector
-#' @param Q.i.k Another q-vector
+#' @param q1 A q-vector
+#' @param q2 Another q-vector
 #' 
 #' @return A restriction matrix
 #' 
@@ -17,10 +17,10 @@
 #' Ma, W., & de la Torre, J. (2020). An empirical Q-matrix validation method for the sequential generalized DINA model. British Journal of Mathematical and Statistical Psychology, 73(1), 142-163. DOI: 10.1111/bmsp.12156.
 #' 
 #' @examples
-#' Q.i <- c(1, 1, 0)
-#' Q.i.k <- c(1, 1, 1)
+#' q1 <- c(1, 1, 0)
+#' q2 <- c(1, 1, 1)
 #' 
-#' Rmatrix <- get.Rmatrix(Q.i, Q.i.k)
+#' Rmatrix <- get.Rmatrix(q1, q2)
 #' 
 #' print(Rmatrix)
 #' 
@@ -28,16 +28,16 @@
 #' @export
 #' @importFrom GDINA attributepattern
 #' 
-get.Rmatrix <- function(Q.i, Q.i.k){
-  att.posi.i.k <- which(Q.i.k > 0)
-  att.posi.i <- which(Q.i > 0)
+get.Rmatrix <- function(q1, q2){
+  att.posi.i.k <- which(q2 > 0)
+  att.posi.i <- which(q1 > 0)
   
-  pattern.reduced.Q.i <- attributepattern(length(att.posi.i))  ## reduced KS pattern for Q.i.k
-  pattern.reduced.Q.i.k <- attributepattern(length(att.posi.i.k))  ## reduced KS pattern for Q.i.k
+  pattern.reduced.q1 <- attributepattern(length(att.posi.i))  ## reduced KS pattern for q2
+  pattern.reduced.q2 <- attributepattern(length(att.posi.i.k))  ## reduced KS pattern for q2
   
-  Rmatrix <- matrix(0, nrow(pattern.reduced.Q.i), nrow(pattern.reduced.Q.i.k))   ## the Restricted matrix
-  dif.reduced <- which(Q.i[att.posi.i.k] != Q.i.k[att.posi.i.k])  ## find the different position between Q.i and Q.i.k
-  pattern.compare <- matrix(pattern.reduced.Q.i.k[, -dif.reduced], nrow = nrow(pattern.reduced.Q.i.k))  ## Used to determine which two vectors need to be compared
+  Rmatrix <- matrix(0, nrow(pattern.reduced.q1), nrow(pattern.reduced.q2))   ## the Restricted matrix
+  dif.reduced <- which(q1[att.posi.i.k] != q2[att.posi.i.k])  ## find the different position between q1 and q2
+  pattern.compare <- matrix(pattern.reduced.q2[, -dif.reduced], nrow = nrow(pattern.reduced.q2))  ## Used to determine which two vectors need to be compared
   is.compared <- rep(0, nrow(pattern.compare))  ## Used to record which vectors have already been recored in Rmatrix
   
   t <- 1

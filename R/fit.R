@@ -1,29 +1,30 @@
-#' Calculate data fit indeces
+#' Calculate fit indeces
 #'
 #' @description
-#' Calculate relative fit indices (-2LL, AIC, BIC, CAIC, SABIC) and absolute fit indices (\eqn{M_2} test)
-#' using the \code{testfit} function in the \code{GDINA} package.
+#' Calculate relative fit indices (-2LL, AIC, BIC, CAIC, SABIC) and absolute fit indices (\eqn{M_2} test, \eqn{RMSEA_2}, SRMSR) 
+#' using the \code{\link[GDINA]{modelfit}} function in the \code{GDINA} package.
 #'
-#' @param Y A required \code{N} × \code{I} matrix or data.frame consisting of the responses of \code{N}
-#'          individuals to \code{I} items. Missing values should be coded as NA.
-#' @param Q A required binary \code{I} × \code{K} matrix containing the attributes not required or required
-#'          , coded as 0 or 1, to master the items. The \code{i}th row of the matrix is a binary indicator vector
-#'          indicating which attributes are not required (coded as 0) and which attributes are required
-#'          (coded as 1) to master item \code{i}.
+#' @param Y A required \eqn{N} × \eqn{I} matrix or \code{data.frame} consisting of the responses of \code{N} individuals
+#'          to \eqn{N} × \eqn{I} items. Missing values need to be coded as \code{NA}.
+#' @param Q A required binary \eqn{I} × \eqn{K} matrix containing the attributes not required or required 
+#'          master the items. The \code{i}th row of the matrix is a binary indicator vector indicating which
+#'          attributes are not required (coded by 0) and which attributes are required (coded by 1) to master
+#'          item \eqn{i}.
 #' @param model Type of model to be fitted; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"},
 #'              \code{"ACDM"}, \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.
 #'
 #' @return
 #' An object of class \code{list}. The list contains various fit indices:
-#'
-#' \item{npar}{The number of parameters.}
-#' \item{-2LL}{The Deviance.}
-#' \item{AIC}{The Akaike information criterion.}
-#' \item{BIC}{The Bayesian information criterion.}
-#' \item{CAIC}{The consistent Akaike information criterion.}
-#' \item{SABIC}{The Sample size Adjusted BIC.}
-#' \item{M2}{A vector consisting of \eqn{M_2} statistic, degrees of freedom, significance level, and \eqn{RMSEA_2} (Liu, Tian, & Xin, 2016).}
-#' \item{SRMSR}{The standardized root mean squared residual (SRMSR; Ravand & Robitzsch, 2018).}
+#' \describe{
+#'  \item{npar}{The number of parameters.}
+#'  \item{-2LL}{The Deviance.}
+#'  \item{AIC}{The Akaike information criterion.}
+#'  \item{BIC}{The Bayesian information criterion.}
+#'  \item{CAIC}{The consistent Akaike information criterion.}
+#'  \item{SABIC}{The Sample-size Adjusted BIC.}
+#'  \item{M2}{A vector consisting of \eqn{M_2} statistic, degrees of freedom, significance level, and \eqn{RMSEA_2} (Liu, Tian, & Xin, 2016).}
+#'  \item{SRMSR}{The standardized root mean squared residual (SRMSR; Ravand & Robitzsch, 2018).}
+#' }
 #'
 #' @author
 #' Haijiang Qin <Haijiang133@outlook.com>
@@ -76,7 +77,8 @@ fit <- function(Y, Q, model="GDINA"){
   names(M2) <- c("M2", "df", "p.value", "RMSEA2")
   fit.index <- list(npar, testfit$Deviance, testfit$AIC, testfit$BIC, testfit$CAIC, testfit$SABIC,
                  M2, testfit$SRMSR)
-  names(fit.index) <- c("npar", "-2LL", "AIC", "BIC", "CAIC", "SABIC",
+  names(fit.index) <- c("npar", 
+                        "-2LL", "AIC", "BIC", "CAIC", "SABIC",
                         "M2", "SRMSR")
   return(fit.index)
 }

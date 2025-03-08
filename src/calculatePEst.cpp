@@ -19,7 +19,7 @@ NumericVector calculatePEst(const NumericVector& Yi, const NumericMatrix& P_alph
   
   NumericVector P_est(L);
   for (int l = 0; l < L; ++l) {
-    P_est[l] = (sum_Y_Palpha_Xi[l] + 1e-10) / (sum_Palpha_Xi[l] + 2e-10);
+    P_est[l] = (sum_Y_Palpha_Xi[l] + 1e-50) / (sum_Palpha_Xi[l] + 2e-50);
   }
 
   return P_est;

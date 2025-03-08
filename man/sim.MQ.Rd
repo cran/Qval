@@ -2,22 +2,22 @@
 % Please edit documentation in R/sim.MQ.R
 \name{sim.MQ}
 \alias{sim.MQ}
-\title{Simulate mis-specifications}
+\title{Simulate mis-specifications in the Q-matrix}
 \usage{
 sim.MQ(Q, rate, verbose = TRUE)
 }
 \arguments{
 \item{Q}{The Q-matrix (\code{\link[Qval]{sim.Q}}) that need to simulate mis-specifications.}
 
-\item{rate}{The pecentage of mis-specifications in the\eqn{Q}.}
+\item{rate}{The ratio of mis-specifications in the Q-matrix.}
 
 \item{verbose}{Logical indicating to print information or not. Default is \code{TRUE}}
 }
 \value{
-An object of class \eqn{matrix}.
+An object of class \code{matrix}.
 }
 \description{
-simulate certen \eqn{rate} mis-specifications in the Q-matrix.
+simulate certen \code{rate} mis-specifications in the Q-matrix.
 }
 \examples{
 library(Qval)

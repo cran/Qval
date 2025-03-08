@@ -1,6 +1,6 @@
 
 #' 
-#' Wald.test for two q-vecotrs
+#' the Wald test for two q-vectors
 #' 
 #' @description
 #' This function flexibly provides the Wald test for any two q-vectors of a given item in the Q-matrix, 
@@ -15,16 +15,19 @@
 #' }
 #' 
 #' @param CDM.obj An object of class \code{CDM.obj}. @seealso \code{\link[Qval]{CDM}}.
-#' @param Q.i A q-vector
-#' @param Q.i.k Another q-vector
-#' @param i the item you focusing on
+#' @param q1 A q-vector
+#' @param q2 Another q-vector
+#' @param i the item needed to be validated
 #'
-#' @returns An object of class \code{list} containing the following components:
-#' \item{Wald.statistic}{The statistic of the Wald test.}
-#' \item{p.value}{The p value}
+#' @returns An object of class \code{htest} containing the following components:
+#' \describe{
+#'  \item{statistic}{The statistic of the Wald test.}
+#'  \item{parameter}{the degrees of freedom for the Wald-statistic.}
+#'  \item{p.value}{The p value}
+#' }
 #'
 #' @examples
-#' 
+#' library(Qval)
 #' set.seed(123)
 #' 
 #' K <- 3
@@ -39,15 +42,15 @@
 #' 
 #' CDM.obj <- CDM(data$dat, Q)
 #' 
-#' Q.i <- c(1, 0, 0)
-#' Q.i.k <- c(1, 1, 0)
+#' q1 <- c(1, 0, 0)
+#' q2 <- c(1, 1, 0)
 #' 
 #' ## Discuss whether there is a significant difference when 
-#' ## the q-vector of the 2nd item in the Q-matrix is Q.i or Q.i.k.
-#' Wald.test.obj <- Wald.test(CDM.obj, Q.i, Q.i.k, i=2)
+#' ## the q-vector of the 2nd item in the Q-matrix is q1 or q2.
+#' Wald.test.obj <- Wald.test(CDM.obj, q1, q2, i=2)
 #' 
 #' print(Wald.test.obj)
-#'
+#' 
 #' 
 #' @export
 #' @import GDINA
@@ -55,27 +58,27 @@
 #' @importFrom stats aggregate pchisq
 #' @importFrom MASS ginv
 #' 
-Wald.test <- function(CDM.obj, Q.i, Q.i.k, i=1){
+Wald.test <- function(CDM.obj, q1, q2, i=1){
   
-  if(sum(Q.i) > sum(Q.i.k)){
-    temp <- Q.i
-    Q.i <- Q.i.k
-    Q.i.k <- temp
+  if(sum(q1) > sum(q2)){
+    temp <- q1
+    q1 <- q2
+    q2 <- temp
   }
   
   GDINA.obj <- CDM.obj$analysis.obj
   Y <- GDINA.obj$Y
-  att.posi.i.k <- which(Q.i.k > 0)
-  att.posi.i <- which(Q.i > 0)
-  att.dif <- which(Q.i != Q.i.k)
+  att.posi.i.k <- which(q2 > 0)
+  att.posi.i <- which(q1 > 0)
+  att.dif <- which(q1 != q2)
   
-  Qr <- extract(GDINA.obj,"Q")
+  Qr <- GDINA.obj$Q
   Qr[i, seq_len(ncol(Qr))] <- 0
   Qr[i, c(att.posi.i, att.dif)] <- 1
   etas <- LC2LG(as.matrix(Qr))
-  itemparj <- extract(GDINA.obj,"catprob.parm")
-  expectedR <- extract(GDINA.obj,"expectedCorrect.LC")
-  expectedN <- extract(GDINA.obj,"expectedTotal.LC")
+  itemparj <- GDINA.obj$catprob.parm
+  expectedR <- GDINA::extract(GDINA.obj,"expectedCorrect.LC")
+  expectedN <- GDINA::extract(GDINA.obj,"expectedTotal.LC")
   
   itemparj[[i]] <- aggregate(expectedR[i, ], by=list(etas[i, ]), sum)$x / aggregate(expectedN[i, ], by=list(etas[i, ]), sum)$x
   index <- data.frame(Cat=rep(1:length(rowSums(Qr) ),2^rowSums(Qr)) )
@@ -88,21 +91,26 @@ Wald.test <- function(CDM.obj, Q.i, Q.i.k, i=1){
                                logpost=indlogPost(GDINA.obj))[[1]]
   
   ## v is the inversed information matrix
-  if(extract(GDINA.obj, "att.dist") != "saturated"){
+  if(GDINA::extract(GDINA.obj, "att.dist") != "saturated"){
     v <- inverse_crossprod(do.call(cbind, sco))
   }else{
     v <- inverse_crossprod(do.call(cbind,sco[-length(sco)]))
   }
   
   ## extrac parameters for item i
-  cov.cur <- v[index$Column[which(index$Cat == i)], index$Column[which(index$Cat == i)]]
+  cov <- v[index$Column[which(index$Cat == i)], index$Column[which(index$Cat == i)]]
   P.Xi.alpha.reduced <- itemparj[[i]]
   
-  ## Restricted matrix based on Q.i and Q.i.k
-  Rmatrix <- get.Rmatrix(Q.i, Q.i.k)
+  ## Restricted matrix based on q1 and q2
+  Rmatrix <- get.Rmatrix(q1, q2)
   
-  Wald.statistic <-t(Rmatrix %*% P.Xi.alpha.reduced) %*% ginv(Rmatrix %*% cov.cur %*% t(Rmatrix)) %*% (Rmatrix %*% P.Xi.alpha.reduced)
-  p.value <- pchisq(Wald.statistic, nrow(Rmatrix), lower.tail = FALSE)
+  Wald.statistic <-t(Rmatrix %*% P.Xi.alpha.reduced) %*% ginv(Rmatrix %*% cov %*% t(Rmatrix)) %*% (Rmatrix %*% P.Xi.alpha.reduced)
+  parameter = nrow(Rmatrix)
+  p.value <- pchisq(Wald.statistic, parameter, lower.tail = FALSE)
   
-  return(list(Wald.statistic=Wald.statistic, p.value=p.value))
+  Wald.obj <- list(statistic=Wald.statistic, parameter=parameter, p.value=p.value)
+  
+  class(Wald.obj) <- "htest"
+  
+  return(Wald.obj)
 }

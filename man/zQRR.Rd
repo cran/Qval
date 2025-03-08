@@ -2,20 +2,20 @@
 % Please edit documentation in R/Qvalindex.R
 \name{zQRR}
 \alias{zQRR}
-\title{Caculate Q-matrix recovery rate (QRR)}
+\title{Calculate Q-matrix recovery rate (QRR)}
 \usage{
 zQRR(Q.true, Q.sug)
 }
 \arguments{
 \item{Q.true}{The true Q-matrix.}
 
-\item{Q.sug}{A The Q-matrix that has being validated.}
+\item{Q.sug}{The Q-matrix that has being validated.}
 }
 \value{
 A numeric (QRR index).
 }
 \description{
-Caculate Q-matrix recovery rate (QRR)
+Calculate Q-matrix recovery rate (QRR)
 }
 \details{
 The Q-matrix recovery rate (QRR) provides information on overall performance, and is defned as:

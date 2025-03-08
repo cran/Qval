@@ -2,7 +2,7 @@
 #' @importFrom GDINA attributepattern
 #' @import parallel
 #'
-correctQ.beta <- function(Y, Q, 
+validation.beta <- function(Y, Q, 
                           CDM.obj=NULL, method="EM", mono.constraint=TRUE, model="GDINA",
                           search.method="beta", maxitr=1, iter.level="test", 
                           criter="AIC", 
@@ -13,31 +13,25 @@ correctQ.beta <- function(Y, Q,
   K <- ncol(Q)
   pattern <- attributepattern(K)
   L <- nrow(pattern)
-
+  
   Q.beta <- Q
-  Q.pattern.ini <- rep(2, I)
-  for(i in 1:I)
-    Q.pattern.ini[i] <- get_Pattern(Q.beta[i, ], pattern)
-  Q.pattern <- Q.pattern.ini
-
-  best.pos <- NULL
+  Q.pattern <- Q.pattern.ini <- apply(Q.beta, 1, function(x) get_Pattern(x, pattern))
+  
   mod0 <- NULL
+  criter.index <- match(criter, c("Deviance", "npar", "item.npar", "AIC", "BIC", "CAIC", "SABIC"))
   
   iter <- 0
   while(iter < maxitr){
     iter <- iter + 1
-    priority <- NULL
-    
-    if(iter != 1 | is.null(CDM.obj))
+
+    if(iter != 1 | is.null(CDM.obj)){
       CDM.obj <- CDM(Y, Q.beta, method=method, mono.constraint=mono.constraint, model=model, verbose = 0)
+    }
     alpha.P <- CDM.obj$alpha.P
     P.alpha <- CDM.obj$P.alpha
     alpha <- CDM.obj$alpha
     P.alpha.Xi <- CDM.obj$P.alpha.Xi
     
-    Q.pattern.cur <- rep(2, I)
-    fit.index.pre <- fit.index.cur <- rep(0, I)
-
     AMP <- as.matrix(personparm(CDM.obj$analysis.obj, what = "MAP")[, -(K+1)])
     beta_Ni_ri.obj <- beta_Ni_ri(pattern, AMP, Y)
     ri <- beta_Ni_ri.obj$ri
@@ -45,6 +39,7 @@ correctQ.beta <- function(Y, Q,
 
     QvalEnv <- new.env()
     assign("Y", Y, envir = QvalEnv)
+    assign("criter.index", criter.index, envir = QvalEnv)
     assign("P.alpha.Xi", P.alpha.Xi, envir = QvalEnv)
     assign("P.alpha", P.alpha, envir = QvalEnv)
     assign("pattern", pattern, envir = QvalEnv)
@@ -54,23 +49,23 @@ correctQ.beta <- function(Y, Q,
     assign("model", model, envir = QvalEnv)
     assign("criter", criter, envir = QvalEnv)
     assign("search.method", search.method, envir = QvalEnv)
-    assign("P_GDINA", P.GDINA, envir = QvalEnv)
+    assign("P_GDINA", P_GDINA, envir = QvalEnv)
     assign("Q.beta", Q.beta, envir = QvalEnv)
     assign("L", L, envir = QvalEnv)
     assign("K", K, envir = QvalEnv)
     assign("alpha.P", alpha.P, envir = QvalEnv)
     assign("get.MLRlasso", get.MLRlasso, envir = QvalEnv)
-    assign("priority", priority, envir = QvalEnv)
     assign("parallel_iter", parallel_iter, envir = QvalEnv)
     assign("parLapply", parLapply, envir = QvalEnv)
 
     cl <- makeCluster(detectCores() - 1)
     clusterExport(cl, c("Y", "P.alpha.Xi", "P.alpha", "pattern", "ri", "Ni", "Q.pattern.ini", "model", "criter",
-                        "search.method", "P_GDINA", "Q.beta", "L", "K", "alpha.P", "get.MLRlasso", "priority"),
+                        "search.method", "P_GDINA", "Q.beta", "L", "K", "alpha.P", "get.MLRlasso"),
                   envir = QvalEnv) 
     results <- parLapply(cl, 1:I, 
                          fun = get("parallel_iter", envir = QvalEnv), 
                          Y = get("Y", envir = QvalEnv),
+                         criter.index = get("criter.index", envir = QvalEnv),
                          P.alpha.Xi = get("P.alpha.Xi", envir = QvalEnv),
                          P.alpha = get("P.alpha", envir = QvalEnv),
                          pattern = get("pattern", envir = QvalEnv),
@@ -85,17 +80,14 @@ correctQ.beta <- function(Y, Q,
                          L = get("L", envir = QvalEnv),
                          K = get("K", envir = QvalEnv),
                          alpha.P = get("alpha.P", envir = QvalEnv),
-                         get.MLRlasso = get("get.MLRlasso", envir = QvalEnv),
-                         priority = get("priority", envir = QvalEnv))
+                         get.MLRlasso = get("get.MLRlasso", envir = QvalEnv))
     stopCluster(cl)
     
-    for(i in 1:I){
-      fit.index.pre[i] <- results[[i]]$fit.index.pre
-      fit.index.cur[i] <- results[[i]]$fit.index.cur
-      Q.pattern.cur[i] <- results[[i]]$Q.pattern.cur
-      priority <- rbind(priority, results[[i]]$priority)
-      best.pos <- rbind(best.pos, results[[i]]$best.pos.i)
-    }
+    fit.index.pre <- sapply(results, function(x) x$fit.index.pre)
+    fit.index.cur <- sapply(results, function(x) x$fit.index.cur)
+    Q.pattern.cur <- sapply(results, function(x) x$Q.pattern.cur)
+    priority <- do.call(rbind, lapply(results, function(x) x$priority))
+    best.pos <- do.call(rbind, lapply(results, function(x) x$best.pos.i))
     
     validating.items <- which(Q.pattern.ini != Q.pattern.cur)
     fit.index.delta <- abs(fit.index.cur - fit.index.pre)
@@ -113,7 +105,7 @@ correctQ.beta <- function(Y, Q,
           while(is.na(best.pos[validating.items[vi], att.vi])) {
             att.vi <- att.vi - 1
           }
-          Q.pattern.cur[i] <- best.pos[validating.items[vi], att.vi]
+          Q.pattern.cur[validating.items[vi]] <- best.pos[validating.items[vi], att.vi]
         }
       }else if(iter.level == "item"){
         if(max(fit.index.delta) > 0.00010){
@@ -168,132 +160,108 @@ correctQ.beta <- function(Y, Q,
 #' @title A tool for the \eqn{\beta} Method
 #'
 #' @description
-#' This function performs a single iteration of the \eqn{\beta} method for A item's validation. It is designed 
+#' This function performs a single iteration of the \eqn{\beta} method for one item's validation. It is designed 
 #' to be used in parallel computing environments to speed up the validation process of the \eqn{\beta} method. 
-#' The function is a utility function for \code{\link[Qval]{validation}}, and it should not be called independently by the user.
+#' The function is a utility function for \code{\link[Qval]{validation}}.
+#' When the user calls the \code{\link[Qval]{validation}} function with \code{method = "beta"},  
+#' \code{\link[Qval]{parallel_iter}} runs automatically, so there is no need for the user to call \code{\link[Qval]{parallel_iter}}.
+#' It may seem that \code{\link[Qval]{parallel_iter}}, as an internal function, could better serve users.  
+#' However, we found that the \code{Qval} package must export it to resolve variable environment conflicts in R  
+#' and enable parallel computation. Perhaps a better solution will be found in the future.  
 #'
-#' @param i Item number that need to be validated.
-#' @param Y Observed data matrix for validation.
-#' @param P.alpha.Xi Individual posterior
-#' @param P.alpha Attribute prior weights.
-#' @param pattern The attribute mastery pattern matrix.
-#' @param ri A vector that contains the numbers of examinees in each knowledge state who correctly answered item \eqn{i}.
-#' @param Ni A vector that contains the total numbers of examinees in each knowledge state.
-#' @param Q.pattern.ini Initial pattern number for the model.
-#' @param model Model object used for fitting (e.g., GDINA).
-#' @param criter Fit criterion ("AIC", "BIC", "CAIC", or "SABIC").
-#' @param search.method Search method for model selection ("beta", "ESA", "SSA", or "PAA").
-#' @param P_GDINA Function to calculate probabilities for GDINA model.
-#' @param Q.beta Q-matrix for validation.
-#' @param L Number of latent pattern.
-#' @param K Number of attributes.
-#' @param alpha.P Individuals' marginal mastery probabilities matrix (Tu et al., 2022)
-#' @param get.MLRlasso Function for Lasso regression with multiple linear regression.
-#' @param priority Vector of priorities for PAA method search.
+#' @param i An integer indicating the item number that needs to be validated.
+#' @param Y A matrix of observed data used for validation.
+#' @param criter.index An integer representing the index of the criterion.
+#' @param P.alpha.Xi A matrix representing individual posterior probability.
+#' @param P.alpha A vector of attribute prior weights.
+#' @param pattern A matrix representing the attribute mastery patterns.
+#' @param ri A vector containing the number of examinees in each knowledge state who correctly answered item \eqn{i}.
+#' @param Ni A vector containing the total number of examinees in each knowledge state.
+#' @param Q.pattern.ini An integer representing the initial pattern order for the model.
+#' @param model A model object used for fitting, such as the GDINA model.
+#' @param criter A character string specifying the fit criterion. Possible values are "AIC", "BIC", "CAIC", or "SABIC".
+#' @param search.method A character string specifying the search method for model selection. Options include "beta", "ESA", "SSA", or "PAA".
+#' @param P_GDINA A function that calculates probabilities for the GDINA model.
+#' @param Q.beta A Q-matrix used for validation.
+#' @param L An integer representing the number of all attribute mastery patterns.
+#' @param K An integer representing the number of attributes.
+#' @param alpha.P A matrix of individuals' marginal mastery probabilities (Tu et al., 2022).
+#' @param get.MLRlasso A function for Lasso regression with multiple linear regression.
 #'
-#' @return
-#' An object of class \code{validation} is a \code{list} containing the following components:
-#' \item{fit.index.pre}{The previous fit index value after applying the selected search method.}
-#' \item{fit.index.cur}{The current fit index value after applying the selected search method.}
-#' \item{Q.pattern.cur}{The pattern that corresponds to the optimal model configuration for the current iteration.}
-#' \item{priority}{The priority vector used in the PAA method, if applicable.}
+#' @return A \code{list} containing the following components:
+#' \describe{
+#'   \item{fit.index.pre}{The previous fit index value after applying the selected search method.}
+#'   \item{fit.index.cur}{The current fit index value after applying the selected search method.}
+#'   \item{Q.pattern.cur}{The pattern that corresponds to the optimal model configuration for the current iteration.}
+#'   \item{priority}{The priority vector used in the PAA method, if applicable.}
+#' }
 #'
+#' @importFrom GDINA GDINA
 #' @export
-parallel_iter <- function(i, Y, P.alpha.Xi, P.alpha, pattern, ri, Ni, 
+parallel_iter <- function(i, Y, criter.index, P.alpha.Xi, P.alpha, pattern, ri, Ni, 
                           Q.pattern.ini, model, criter, search.method, 
-                          P_GDINA, Q.beta, L, K, alpha.P, get.MLRlasso, 
-                          priority) {
+                          P_GDINA, Q.beta, L, K, alpha.P, get.MLRlasso) {
   result <- list()
   best.pos.i <- rep(NA, K)
   fit.index.K <- rep(Inf, K)
   
   q.possible <- 2
   P.est <- calculatePEst(Y[, i], P.alpha.Xi)
-  mod0 <- GDINA(Y, pattern[Q.pattern.ini, ], model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))
+  mod0 <- unlist(GDINA(Y, pattern[Q.pattern.ini, ], model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))$testfit)
   
   best.pos.i[sum(pattern[Q.pattern.ini[i], ])] <- get_Pattern(pattern[Q.pattern.ini[i], ], pattern)
-  if (criter == "AIC") {
-    result$fit.index.pre <- mod0$testfit$AIC
-    result$fit.index.cur <- mod0$testfit$AIC
-  } else if (criter == "BIC") {
-    result$fit.index.pre <- mod0$testfit$BIC
-    result$fit.index.cur <- mod0$testfit$BIC
-  } else if (criter == "CAIC") {
-    result$fit.index.pre <- mod0$testfit$CAIC
-    result$fit.index.cur <- mod0$testfit$CAIC
-  } else if (criter == "SABIC") {
-    result$fit.index.pre <- mod0$testfit$SABIC
-    result$fit.index.cur <- mod0$testfit$SABIC
-  }
+  result$fit.index.pre <- result$fit.index.cur <- mod0[criter.index]
   
   ################################### beta search ###################################
   if (search.method == "beta") {
-    beta <- rep(0, K)
+    ## determin the search space with beta
     pattern.single <- which(rowSums(pattern) == 1)
-    for (k in 1:length(pattern.single)) {
-      P.Xi.alpha.cur <- P_GDINA(pattern[pattern.single[k], ], P.est, pattern, P.alpha)
-      value <- abs((ri[, i] / Ni) * P.Xi.alpha.cur - (1 - ri[, i] / Ni) * (1 - P.Xi.alpha.cur))
-      value[is.nan(value) | is.infinite(value)] <- 0
-      beta[k] <- sum(value)
-    }
+    P.Xi.alpha.cur <- apply(pattern[pattern.single, ], 1, function(row) P_GDINA(row, P.est, pattern, P.alpha))
+    value <- abs((ri[, i] / Ni) * P.Xi.alpha.cur - (1 - ri[, i] / Ni) * (1 - P.Xi.alpha.cur))
+    value[is.nan(value) | is.infinite(value)] <- 0
+    beta <- colSums(value)
     best.pos.i[1] <- which.max(beta) + 1
     
     att.max <- which.max(beta)
     att.min <- which.min(beta)
     pattern.search <- which(pattern[, att.max] == 1 & pattern[, att.min] == 0 | rowSums(pattern) == K)
-    
-    fit.index.temp <- rep(0, length(pattern.search))
-    for (l in 1:length(pattern.search)) {
+
+    ## search q-vectors in search space
+    pattern.sum <- rowSums(pattern[pattern.search, ])
+    fit.index.temp <- sapply(1:length(pattern.search), function(l) {
       Q.temp <- Q.beta
       Q.temp[i, ] <- pattern[pattern.search[l], ]
-      mod0 <- GDINA(Y, Q.temp, model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))
+      mod0 <- unlist(GDINA(Y, Q.temp, model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))$testfit)
       
-      if (criter == "AIC") {
-        fit.index.temp[l] <- mod0$testfit$AIC
-      } else if (criter == "BIC") {
-        fit.index.temp[l] <- mod0$testfit$BIC
-      } else if (criter == "CAIC") {
-        fit.index.temp[l] <- mod0$testfit$CAIC
-      } else if (criter == "SABIC") {
-        fit.index.temp[l] <- mod0$testfit$SABIC
+      if(fit.index.K[pattern.sum[l]] > mod0[criter.index]){
+        best.pos.i[pattern.sum[l]] <<- pattern.search[l]
+        fit.index.K[pattern.sum[l]] <<- mod0[criter.index]
       }
       
-      if(fit.index.K[sum(pattern[pattern.search[l], ])] > fit.index.temp[l]){
-        best.pos.i[sum(pattern[pattern.search[l], ])] <- l
-        fit.index.K[sum(pattern[pattern.search[l], ])] <- fit.index.temp[l]
-      }
-    }
-    
+      return(mod0[criter.index])
+    })
+
     q.possible <- pattern.search[which.min(fit.index.temp)]
     result$fit.index.cur <- fit.index.temp[which.min(fit.index.temp)]
   }
 
   ######################################## ESA ########################################
   if (search.method == "ESA") {
-    fit.index.i <- rep(Inf, L)
-    beta.i <- rep(-Inf, L)
-    for (l in 2:L) {
+    pattern.sum <- rowSums(pattern[1:L, ])
+    fit.index.i <- sapply(2:L, function(l) {
       Q.temp <- Q.beta
       Q.temp[i, ] <- pattern[l, ]
-      mod0 <- GDINA(Y, Q.temp, model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))
+      mod0 <- unlist(GDINA(Y, Q.temp, model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))$testfit)
       
-      if (criter == "AIC") {
-        fit.index.i[l] <- mod0$testfit$AIC
-      } else if (criter == "BIC") {
-        fit.index.i[l] <- mod0$testfit$BIC
-      } else if (criter == "CAIC") {
-        fit.index.i[l] <- mod0$testfit$CAIC
-      } else if (criter == "SABIC") {
-        fit.index.i[l] <- mod0$testfit$SABIC
+      if(fit.index.K[pattern.sum[l]] > mod0[criter.index]){
+        best.pos.i[pattern.sum[l]] <<- l
+        fit.index.K[pattern.sum[l]] <<- mod0[criter.index]
       }
       
-      if(fit.index.K[sum(pattern[l, ])] > fit.index.i[l]){
-        best.pos.i[sum(pattern[l, ])] <- l
-        fit.index.K[sum(pattern[l, ])] <- fit.index.i[l]
-      }
-    }
-    
-    q.possible <- which.min(fit.index.i)
+      return(mod0[criter.index])
+    })
+
+    q.possible <- which.min(fit.index.i) + 1
     result$fit.index.cur <- fit.index.i[q.possible]
   }
 
@@ -314,17 +282,8 @@ parallel_iter <- function(i, Y, P.alpha.Xi, P.alpha, pattern, ri, Ni,
           
           Q.temp <- Q.beta
           Q.temp[i, ] <- Q.i.cur
-          mod0 <- GDINA(Y, Q.temp, model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))
-          
-          if (criter == "AIC") {
-            fit.index.i.k.temp <- mod0$testfit$AIC
-          } else if (criter == "BIC") {
-            fit.index.i.k.temp <- mod0$testfit$BIC
-          } else if (criter == "CAIC") {
-            fit.index.i.k.temp <- mod0$testfit$CAIC
-          } else if (criter == "SABIC") {
-            fit.index.i.k.temp <- mod0$testfit$SABIC
-          }
+          mod0 <- unlist(GDINA(Y, Q.temp, model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))$testfit)
+          fit.index.i.k.temp <- mod0[criter.index]
           
           if (fit.index.i.k.temp < fit.index.i.k) {
             Q.i.k <- Q.i.cur
@@ -368,17 +327,9 @@ parallel_iter <- function(i, Y, P.alpha.Xi, P.alpha, pattern, ri, Ni,
       
       Q.temp <- Q.beta
       Q.temp[i, ] <- Q.i
-      mod0 <- GDINA(Y, Q.temp, model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))
+      mod0 <- unlist(GDINA(Y, Q.temp, model, mono.constraint = TRUE, verbose=0, control = list(maxitr=300))$testfit)
+      fit.index.i.k.temp <- mod0[criter.index]
       
-      if (criter == "AIC") {
-        fit.index.i.k.temp <- mod0$testfit$AIC
-      } else if (criter == "BIC") {
-        fit.index.i.k.temp <- mod0$testfit$BIC
-      } else if (criter == "CAIC") {
-        fit.index.i.k.temp <- mod0$testfit$CAIC
-      } else if (criter == "SABIC") {
-        fit.index.i.k.temp <- mod0$testfit$SABIC
-      }
       best.pos.i[sum(Q.i)] <- q.possible.cur
       
       if (fit.index.i.k > fit.index.i.k.temp) {

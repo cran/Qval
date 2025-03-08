@@ -7,17 +7,19 @@
 sim.Q(K, I)
 }
 \arguments{
-\item{K}{The number of attributes of each item.}
+\item{K}{The number of attributes of the Q-matrix.}
 
 \item{I}{The number of items.}
 }
 \value{
-An object of class \eqn{matrix}.
+An object of class \code{matrix}.
 }
 \description{
-generate a \eqn{I} * \eqn{K} Q-matrix randomly, which consisted of one-attribute q-vectors
-(0.5), two-attribute q-vectors (0.25), and three-attribute q-vectors (0.25). 
+generate a \eqn{I} × \eqn{K} Q-matrix randomly, which consisted of one-attribute q-vectors
+(50%), two-attribute q-vectors (25%), and three-attribute q-vectors (25%). 
 This function ensures that the generated Q-matrix contains at least two identity matrices as a priority.
+Therefore, this function must also satisfy the condition that the number of items (\eqn{I})  
+must be at least twice the number of attributes (\eqn{K}).
 }
 \examples{
 library(Qval)

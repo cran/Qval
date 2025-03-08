@@ -5,7 +5,10 @@
 #' @importFrom stats coef predict
 #' 
 get.MLRlasso <- function(alpha.P, Y.i) {
+  
+  options(warn = -1)
   fit <- glmnet(alpha.P, Y.i, family = "binomial", alpha = 1, nlambda = 50)
+  options(warn = 0)
 
   lin.preds <- predict(fit, newx = alpha.P, type = "link", s = fit$lambda)
   predicted.probs <- 1 / (1 + exp(-lin.preds))

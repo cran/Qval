@@ -1,13 +1,13 @@
-#' Simulate mis-specifications
+#' Simulate mis-specifications in the Q-matrix
 #'
 #' @description
-#' simulate certen \eqn{rate} mis-specifications in the Q-matrix.
+#' simulate certen \code{rate} mis-specifications in the Q-matrix.
 #'
 #' @param Q The Q-matrix (\code{\link[Qval]{sim.Q}}) that need to simulate mis-specifications.
-#' @param rate The pecentage of mis-specifications in the\eqn{Q}.
+#' @param rate The ratio of mis-specifications in the Q-matrix.
 #' @param verbose Logical indicating to print information or not. Default is \code{TRUE}
 #'
-#' @return An object of class \eqn{matrix}.
+#' @return An object of class \code{matrix}.
 #'
 #' @author Haijiang Qin <Haijiang133@outlook.com>
 #'

@@ -4,12 +4,12 @@
 \alias{get.Rmatrix}
 \title{Restriction matrix}
 \usage{
-get.Rmatrix(Q.i, Q.i.k)
+get.Rmatrix(q1, q2)
 }
 \arguments{
-\item{Q.i}{A q-vector}
+\item{q1}{A q-vector}
 
-\item{Q.i.k}{Another q-vector}
+\item{q2}{Another q-vector}
 }
 \value{
 A restriction matrix
@@ -19,10 +19,10 @@ This function returns the restriction matrix (de la Torre, 2011; Ma & de la Torr
 where the two q-vectors can only differ by one attribute.
 }
 \examples{
-Q.i <- c(1, 1, 0)
-Q.i.k <- c(1, 1, 1)
+q1 <- c(1, 1, 0)
+q2 <- c(1, 1, 1)
 
-Rmatrix <- get.Rmatrix(Q.i, Q.i.k)
+Rmatrix <- get.Rmatrix(q1, q2)
 
 print(Rmatrix)
 

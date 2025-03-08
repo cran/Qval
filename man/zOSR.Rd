@@ -2,7 +2,7 @@
 % Please edit documentation in R/Qvalindex.R
 \name{zOSR}
 \alias{zOSR}
-\title{Caculate over-specifcation rate (OSR)}
+\title{Calculate over-specifcation rate (OSR)}
 \usage{
 zOSR(Q.true, Q.sug)
 }
@@ -15,15 +15,15 @@ zOSR(Q.true, Q.sug)
 A numeric (OSR index).
 }
 \description{
-Caculate over-specifcation rate (OSR)
+Calculate over-specifcation rate (OSR)
 }
 \details{
 The OSR is defned as:
 \deqn{
  OSR = \frac{\sum_{i=1}^{I}\sum_{k=1}^{K}I(q_{ik}^{t} < q_{ik}^{s})}{I × K}
 }
-where \eqn{q_{ik}^{t}} denotes the \code{k}th attribute of item \code{i} in the true Q-matrix (\code{Q.true}),
-\eqn{q_{ik}^{s}} denotes \code{k}th attribute of item \code{i} in the suggested Q-matrix(\code{Q.sug}),
+where \eqn{q_{ik}^{t}} denotes the \eqn{k}th attribute of item \eqn{i} in the true Q-matrix (\code{Q.true}),
+\eqn{q_{ik}^{s}} denotes \eqn{k}th attribute of item \eqn{i} in the suggested Q-matrix(\code{Q.sug}),
 and \eqn{I(\cdot)} is the indicator function.
 }
 \examples{

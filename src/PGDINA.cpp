@@ -54,8 +54,8 @@ Rcpp::NumericVector P_GDINA(Rcpp::NumericVector& Qi, Rcpp::NumericVector& P_est,
   }
   
   for(size_t i = 0; i < L; ++i) {  // Use size_t for index i
-    if(P_Xj_alpha[i] < 0.0001) P_Xj_alpha[i] = 0.0001;
-    if(P_Xj_alpha[i] > 0.9999) P_Xj_alpha[i] = 0.9999;
+    if(P_Xj_alpha[i] < 1e-50) P_Xj_alpha[i] = 1e-50;
+    if(P_Xj_alpha[i] > 1-1e-50) P_Xj_alpha[i] = 1-1e-50;
   }
   
   return P_Xj_alpha;

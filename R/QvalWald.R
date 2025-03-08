@@ -1,6 +1,6 @@
 
 #' @importFrom GDINA attributepattern Qval
-correctQ.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE, 
+validation.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE, 
                           search.method="stepwise", iter.level = "test", maxitr=1,
                           eps=0.95, alpha.level=0.05, verbose = TRUE){
 
@@ -11,10 +11,7 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE,
   pattern <- attributepattern(K)
 
   Q.Wald <- Q
-  Q.pattern.ini <- rep(2, I)
-  for(i in 1:I)
-    Q.pattern.ini[i] <- get_Pattern(Q.Wald[i, ], pattern)
-  Q.pattern <- Q.pattern.ini
+  Q.pattern <- Q.pattern.ini <- apply(Q.Wald, 1, function(x) get_Pattern(x, pattern))
 
   iter <- 0
   while(iter < maxitr){
@@ -27,7 +24,7 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE,
     P.alpha <- CDM.obj$P.alpha
     alpha <- CDM.obj$alpha
     P.alpha.Xi <- CDM.obj$P.alpha.Xi
-
+    
     Q.pattern.cur <- rep(2, I)
     PVAF.pre <- PVAF.cur <- rep(0, I)
     
@@ -35,6 +32,15 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE,
       
       P.est <- calculatePEst(Y[, i], P.alpha.Xi)
       P.mean <- sum(P.est * P.alpha)
+      
+      if(eps == "logit"){
+        IQ <- 1 - P.est[1] - P.est[L]
+        eps.eq <- -0.405 + 2.867*IQ + 4.840*10^4*N - 3.316*10^3*I
+        eps.value <- exp(eps.eq) /(exp(eps.eq) + 1) 
+      }else{
+        eps.value <- eps
+      }
+      
       P.Xi.alpha.L <- P_GDINA(rep(1, K), P.est, pattern, P.alpha)
       zeta2.i.K <- sum((P.Xi.alpha.L - P.mean)^2 * P.alpha)
       
@@ -44,22 +50,21 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE,
       ############################ stepwise or forward (SSA) #############################
       if(search.method == "stepwise" || search.method == "SSA" || search.method == "forward"){
         
-        PVAF.K <- rep(0, K)
         Q.i <- rep(0, K)
-        Q.i.full <- rep(1, K)
-        for(k in 1:K){
+        PVAF.K <- sapply(1:K, function(k){
           Q.i.cur <- Q.i
           Q.i.cur[k] <- 1
           P.Xj.alpha.cur <- P_GDINA(Q.i.cur, P.est, pattern, P.alpha)
           zeta2.i.k.cur <- sum((P.Xj.alpha.cur - P.mean)^2 * P.alpha)
-          PVAF.K[k] <- zeta2.i.k.cur / zeta2.i.K
-        }
+          return(zeta2.i.k.cur / zeta2.i.K)
+        })
         Q.i[which.max(PVAF.K)] <- 1
         PVAF.i <- max(PVAF.K)
         PVAF.cur[i] <- PVAF.i
         q.possible <- get_Pattern(Q.i, pattern)
         
-        if(PVAF.i < eps){
+        Q.i.full <- rep(1, K)
+        if(PVAF.i < eps.value){
           loop <- TRUE
           att.num <- sum(Q.i)
           while(loop && att.num < K){
@@ -88,13 +93,14 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE,
               }
               remove.old <- rbind(remove.old, remove.old.cur)
             }
-            # colnames(remove.old) <- att.posi
-            # colnames(add.new) <- c("att", "p", "PVAF")
+            colnames(remove.old) <- att.posi
+            colnames(add.new) <- c("att", "p", "PVAF")
+            rownames(remove.old) <- rownames(add.new) <- 1:length(att.dif)
             
             att.operate <- which(add.new[, 2] < alpha.level)
             if(length(att.operate) > 0){
               add.remove <- cbind(add.new[att.operate, , drop=FALSE], remove.old[att.operate, , drop=FALSE])
-              add.remove <- add.remove[which.max(add.remove[, 2]), ]
+              add.remove <- add.remove[which.max(add.remove[, 3]), ]
               
               Q.i[add.remove[1]] <- 1
               if(search.method == "stepwise"){
@@ -108,7 +114,7 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE,
               P.Xj.alpha.cur <- P_GDINA(Q.i, P.est, pattern, P.alpha)
               zeta2.i.k.cur <- sum((P.Xj.alpha.cur - P.mean)^2 * P.alpha)
               PVAF.i <- zeta2.i.k.cur / zeta2.i.K
-              if(PVAF.i > eps){
+              if(PVAF.i > eps.value){
                 q.possible <- get_Pattern(Q.i, pattern)
                 PVAF.cur[i] <- PVAF.i
                 loop <- FALSE
@@ -146,7 +152,7 @@ correctQ.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE,
           zeta2.i.k.cur <- sum((P.Xj.alpha.cur - P.mean)^2 * P.alpha)
           PVAF.i.k.cur <- zeta2.i.k.cur/zeta2.i.K
 
-          if(PVAF.i.k.cur >= eps | search.length == 1){
+          if(PVAF.i.k.cur > eps.value | search.length == 1){
             PVAF.cur[i] <- PVAF.i.k.cur
             Q.i <- Q.i.cur
             q.possible <- q.possible.cur

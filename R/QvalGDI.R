@@ -1,7 +1,7 @@
 #'
 #' @importFrom GDINA attributepattern
 #'
-correctQ.GDI <- function(Y, Q, 
+validation.GDI <- function(Y, Q, 
                          CDM.obj=NULL, method="EM", mono.constraint=TRUE, model="GDINA",
                          search.method="ESA", maxitr=1, iter.level="test", eps=0.95,
                          verbose = TRUE){
@@ -14,11 +14,7 @@ correctQ.GDI <- function(Y, Q,
   eps.value <- eps
 
   Q.GDI <- Q
-  Q.pattern.ini <- rep(2, I)
-  for(i in 1:I)
-    Q.pattern.ini[i] <- get_Pattern(Q.GDI[i, ], pattern)
-  Q.pattern <- Q.pattern.ini
-  
+  Q.pattern <- Q.pattern.ini <- apply(Q.GDI, 1, function(x) get_Pattern(x, pattern))
 
   iter <- 0
   while(iter < maxitr){
@@ -54,27 +50,27 @@ correctQ.GDI <- function(Y, Q,
 
       ######################################## ESA ########################################
       if(search.method == "ESA"){
-        PVAF.K <- rep(-Inf, K)
-        zeta2 <- rep(-Inf, L)
-        for(l in 2:L){
-          P.Xi.alpha <- P_GDINA(pattern[l, ], P.est, pattern, P.alpha)
-          zeta2[l] <- sum((P.Xi.alpha - P.mean)^2 * P.alpha)
-        }
+        # Precompute zeta2 values for all patterns
+        P.Xi.alpha <- sapply(2:L, function(l) P_GDINA(pattern[l, ], P.est, pattern, P.alpha))
+        zeta2 <- c(-Inf, apply(P.Xi.alpha, 2, function(x) sum((x - P.mean)^2 * P.alpha)))
         PVAF <- zeta2 / zeta2[L]
-        for (l in 2:L) {
-          pos <- sum(pattern[l, ])
+
+        # Update PVAF.K and best.pos
+        pattern.sum <- rowSums(pattern[1:L, ])  # Calculate sums of each pattern
+        PVAF.K <- rep(-Inf, K)
+        for(l in 2:L){
+          pos <- pattern.sum[l]
           if(PVAF.K[pos] < PVAF[l]){
             PVAF.K[pos] <- PVAF[l]
             best.pos[i, pos] <- l
           }
         }
-        
-        for(l in 2:L){
-          if(PVAF[l] >= eps.value){
-            Q.pattern.cur[i] <- l
-            PVAF.cur[i] <- PVAF[l]
-            break
-          }
+
+        # Find the first pattern where PVAF[l] >= eps.value
+        q.possible <- best.pos[i, which(PVAF.K >= eps.value)]
+        if (length(q.possible) > 0) {
+          Q.pattern.cur[i] <- q.possible[1]
+          PVAF.cur[i] <- PVAF[q.possible[1]]
         }
       }
 
@@ -168,7 +164,7 @@ correctQ.GDI <- function(Y, Q,
           while(is.na(best.pos[validating.items[vi], att.vi])) {
             att.vi <- att.vi - 1
           }
-          Q.pattern.cur[i] <- best.pos[validating.items[vi], att.vi]
+          Q.pattern.cur[validating.items[vi]] <- best.pos[validating.items[vi], att.vi]
         }
       }else if(iter.level == "item"){
         if(sum(PVAF.delta) > 0.00010){

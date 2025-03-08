@@ -1,14 +1,12 @@
-
 #' 
 #' Hull Plot
 #' 
 #' @description
-#' This function can provide the Hull plot. The points suggested by the Hull method are marked in red.
+#' This function can provide the Hull plot. The point suggested by the Hull method is marked in red.
 #' 
-#' @param x A \code{list} containing all the information needed to plot the Hull plot. 
-#'          It can be gotten from the \code{validation} object when \code{method} = \code{"Hull"}.
+#' @param x A \code{\link[Qval]{validation}} in which \code{method} = \code{"Hull"}.
 #' @param i A numeric, which represents the item you want to plot Hull curve. 
-#' @param ... Additional arguments to be passed to the plotting function.
+#' @param ... Additional arguments.
 #' 
 #' 
 #' @return None. This function is used for side effects (plotting).
@@ -18,11 +16,11 @@
 #' library(Qval)
 #' 
 #' ## generate Q-matrix and data
-#' K <- 5
+#' K <- 4
 #' I <- 20
 #' IQ <- list(
-#'   P0 = runif(I, 0.1, 0.3),
-#'   P1 = runif(I, 0.7, 0.9)
+#'   P0 = runif(I, 0.2, 0.4),
+#'   P1 = runif(I, 0.6, 0.8)
 #' )
 #' 
 #' \donttest{
@@ -34,38 +32,43 @@
 #' 
 #' ############### ESA ###############
 #' Hull.obj <- validation(data$dat, MQ, CDM.obj, method = "Hull", search.method = "ESA") 
-#' Hull.fit <- Hull.obj$Hull.fit
 #' 
-#' ## plot Hull curve for item 5
-#' plot(Hull.fit, 5)
+#' ## plot Hull curve for item 20
+#' plot(Hull.obj, 20)
 #' 
 #' ############### PAA ###############
 #' Hull.obj <- validation(data$dat, MQ, CDM.obj, method = "Hull", search.method = "PAA") 
-#' Hull.fit <- Hull.obj$Hull.fit
 #' 
-#' ## plot Hull curve for item 5
-#' plot(Hull.fit, 5)
+#' ## plot Hull curve for item 20
+#' plot(Hull.obj, 20)
 #' }
-#' 
+#'  
 #' 
 #' 
 #' @export
-#' @importFrom graphics plot points text
+#' @importFrom graphics plot points text axis
 #' 
-plot.Hull <- function(x, i, ...){
+plot.validation <- function(x, i, ...){
   
-  number.of.parameters <- x[[i]]$number.of.parameters
-  fit.index <- x[[i]]$fit.index
-  posi <- x[[i]]$posi
-  pattern.criterion <- x[[i]]$pattern.criterion
-  pattern <- x[[i]]$pattern
-  criter <- x[[i]]$criter
-  sug <-  which(fit.index == x[[i]]$sug)
+  if(is.null(x$Hull.fit)){
+    stop("can not plot Hull when method != 'Hull'")
+  }
+  Hull.fit <- x$Hull.fit
+  
+  number.of.parameters <- Hull.fit[[i]]$number.of.parameters
+  fit.index <- Hull.fit[[i]]$fit.index
+  posi <- Hull.fit[[i]]$posi
+  pattern.criterion <- Hull.fit[[i]]$pattern.criterion
+  pattern <- Hull.fit[[i]]$pattern
+  criter <- Hull.fit[[i]]$criter
+  sug <-  which(fit.index == Hull.fit[[i]]$sug)
   
   plot(number.of.parameters[posi], fit.index[posi], 
        type = "o", pch = 19, 
        main = "Hull plot", 
-       xlab = "Number of Parameters", ylab = criter)
+       xlab = "Number of Parameters", ylab = criter, 
+       xaxt = "n")
+  axis(1, at = number.of.parameters, labels = number.of.parameters)
   points(number.of.parameters[-posi], fit.index[-posi], pch = 1)
   points(number.of.parameters[sug], fit.index[sug], col = "red", pch = 19, cex=1)
   
@@ -76,23 +79,20 @@ plot.Hull <- function(x, i, ...){
     labels <- paste0(labels, pattern[labels.pattern.criterion, k])
   labels <- paste0(labels, rep("]", length(labels.pattern.criterion)))
   
+  size = 1.0
+  num.points <- length(number.of.parameters)
+  text(number.of.parameters[1], fit.index[1], labels = labels[1], pos = 4, cex = size, col = "black")
+  text(number.of.parameters[num.points]*0.975, fit.index[num.points], labels = labels[num.points], pos = 1, cex = size, col = "black")
+  
   # Automatically adjust label positions
-  for (i in 1:length(number.of.parameters)) {
+  for (i in (num.points-1):2) {
     # Default pos = 3 (top)
-    pos <- 3 
+    pos <- 3
     # Check if close to the top or bottom of the plot
-    if (fit.index[i] > max(fit.index) * 0.9) {
+    if (fit.index[i] > max(fit.index) * 0.95) {
       pos <- 1  # If close to the top, place the label below
-    } else if (fit.index[i] < min(fit.index) * 1.1) {
-      pos <- 3  # If close to the bottom, place the label above
-    }
-    # Check if close to the left or right edges of the plot
-    if (number.of.parameters[i] > max(number.of.parameters) * 0.9) {
-      pos <- 2  # If close to the right, place the label to the left
-    } else if (number.of.parameters[i] < min(number.of.parameters) * 1.1) {
-      pos <- 4  # If close to the left, place the label to the right
     }
     
-    text(number.of.parameters[i], fit.index[i], labels = labels[i], pos = pos, cex = 0.8, col = "black")
+    text(number.of.parameters[i], fit.index[i], labels = labels[i], pos = pos, cex = size, col = "black")
   }
 }

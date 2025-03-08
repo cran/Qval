@@ -1,12 +1,13 @@
 #' Calculate \eqn{\mathbf{M}} matrix
 #'
 #' @description
-#' Calculate \eqn{\mathbf{M}} matrix for stauted CDMs (de la Torre, 2011).
+#' Calculate \eqn{\mathbf{M}} matrix for stauted CDMs (de la Torre, 2011). The \eqn{\mathbf{M}} matrix is a matrix used to 
+#' represent the interaction mechanisms between attributes.  
 #'
-#' @param K The number of attributes. Can be NULL if \code{pattern} is passed to the function and is not NULL.
-#' @param pattern The knowledge state matrix containing all possible attribute mastery pattern.
-#'                Can be gained from @seealso \code{\link[GDINA]{attributepattern}}. Also can be NULL if \code{K}
-#'                is passed to the function and is not NULL.
+#' @param K The number of attributes. Can be \code{NULL} if the argument \code{pattern} is not \code{NULL}.
+#' @param pattern The attribute mastery pattern matrix containing all possible attribute mastery pattern.
+#'                Can be gained from \code{\link[GDINA]{attributepattern}}. Also can be \code{NULL} if \code{K}
+#'                is not \code{NULL}.
 #'
 #' @return
 #' An object of class \code{matrix}.
@@ -37,9 +38,8 @@ get.Mmatrix <- function(K = NULL, pattern = NULL){
 
   L <- nrow(pattern)
   K <- ncol(pattern)
-  Mmatrix <- matrix(0, L, L)
-  for(l1 in 1:L)
-    for(l2 in 1:L)
-      Mmatrix[l1, l2] <- prod(pattern[l1, ]^pattern[l2, ])
+
+  Mmatrix <- outer(1:L, 1:L, Vectorize(function(l1, l2) prod(pattern[l1, ]^pattern[l2, ])))
+  
   return(Mmatrix)
 }

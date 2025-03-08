@@ -2,28 +2,28 @@
 % Please edit documentation in R/Qvalindex.R
 \name{zVRR}
 \alias{zVRR}
-\title{Caculate vector recovery ratio (VRR)}
+\title{Calculate vector recovery ratio (VRR)}
 \usage{
 zVRR(Q.true, Q.sug)
 }
 \arguments{
 \item{Q.true}{The true Q-matrix.}
 
-\item{Q.sug}{A The Q-matrix that has being validated.}
+\item{Q.sug}{The Q-matrix that has being validated.}
 }
 \value{
 A numeric (VRR index).
 }
 \description{
-Caculate vector recovery ratio (VRR)
+Calculate vector recovery ratio (VRR)
 }
 \details{
 The VRR shows the ability of the validation method to recover q-vectors, and is determined by
 \deqn{
  VRR =\frac{\sum_{i=1}^{I}I(\mathbf{q}_{i}^{t} = \mathbf{q}_{i}^{s})}{I}
 }
-where \eqn{\mathbf{q}_{i}^{t}} denotes the \eqn{\mathbf{q}}-vector of item \code{i} in the true Q-matrix (\code{Q.true}),
-\eqn{\mathbf{q}_{i}^{s}} denotes the \eqn{\mathbf{q}}-vector of item \code{i} in the suggested Q-matrix(\code{Q.sug}),
+where \eqn{\mathbf{q}_{i}^{t}} denotes the \eqn{\mathbf{q}}-vector of item \eqn{i} in the true Q-matrix (\code{Q.true}),
+\eqn{\mathbf{q}_{i}^{s}} denotes the \eqn{\mathbf{q}}-vector of item \eqn{i} in the suggested Q-matrix(\code{Q.sug}),
 and \eqn{I(\cdot)} is the indicator function.
 }
 \examples{

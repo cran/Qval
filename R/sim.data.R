@@ -1,12 +1,15 @@
-#' generate response data
+#' generate response
 #'
 #' @description
-#' randomly generate response data matrix according to certen conditions,
+#' randomly generate response matrix according to certain conditions,
 #' including attributes distribution, item quality, sample size, Q-matrix and cognitive diagnosis models (CDMs).
 #'
-#' @param Q The Q-matrix. A random 30 × 5 Q-matrix (\code{\link[Qval]{sim.Q}}) will be used if NULL.
+#' @param Q The Q-matrix. A random 30 × 5 Q-matrix (\code{\link[Qval]{sim.Q}}) will be used if \code{Q = NULL}.
 #' @param N Sample size. Default = 500.
-#' @param IQ A List contains tow I-length vectors: \code{P0} and \code{P1}.
+#' @param IQ A list containing two \eqn{I}-length vectors: \code{P0} and \code{P1}.  
+#'           \code{P0} represents the probability of examinees who have not mastered any attributes  
+#'           (\eqn{[00...0]}) correctly answering the item, while \code{P1} represents the probability  
+#'           of examinees who have mastered all attributes (\eqn{[11...1]}) correctly answering the item.  
 #' @param model Type of model to be fitted; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"},
 #'              \code{"ACDM"}, \code{"LLM"}, or \code{"rRUM"}.
 #' @param distribute Attribute distributions; can be \code{"uniform"} for the uniform distribution,
@@ -19,7 +22,7 @@
 #'     \item \code{cutoffs}  A vector giving the cutoff for each attribute when \code{distribute = "mvnorm"}.
 #'                          Default = \eqn{k/(1+K)} (Chiu, Douglas, & Li, 2009).
 #'     \item \code{theta} A vector of length N representing the higher-order ability for each examinee.
-#'                       By default, generate randomly from the normal distribution (Tu et al, 2022).
+#'                       By default, generate randomly from the standard normal distribution (Tu et al, 2022).
 #'     \item \code{a} The slopes for the higher-order model when \code{distribute = "horder"}.
 #'                   Default = 1.5 (Tu et al, 2022).
 #'     \item \code{b} The intercepts when \code{distribute = "horder"}. By default, select equally spaced
@@ -27,17 +30,19 @@
 #'  }
 #' @param verbose Logical indicating to print information or not. Default is \code{TRUE}
 #'
-#' @return Object of class \code{simGDINA}.
-#' An \code{simGDINA} object gained by \code{simGDINA} function form \code{GDINA} package.
+#' @return Object of class \code{sim.data}.
+#' An \code{sim.data} object initially gained by \code{\link[GDINA]{simGDINA}} function form \code{GDINA} package.
 #' Elements that can be extracted using method extract include:
-#' \item{dat}{An \code{N} × \code{I} simulated item response matrix.}
-#' \item{Q}{The Q-matrix.}
-#' \item{attribute}{An \code{N} × \code{K} matrix for inviduals' attribute patterns.}
-#' \item{catprob.parm}{A list of non-zero category success probabilities for each latent group.}
-#' \item{delta.parm}{A list of delta parameters.}
-#' \item{higher.order.parm}{Higher-order parameters.}
-#' \item{mvnorm.parm}{Multivariate normal distribution parameters.}
-#' \item{LCprob.parm}{A matrix of item/category success probabilities for each latent class.}
+#' \describe{
+#'  \item{dat}{An \code{N} × \code{I} simulated item response matrix.}
+#'  \item{Q}{The Q-matrix.}
+#'  \item{attribute}{An \code{N} × \code{K} matrix for inviduals' attribute patterns.}
+#'  \item{catprob.parm}{A list of non-zero success probabilities for each attribute mastery pattern.}
+#'  \item{delta.parm}{A list of delta parameters.}
+#'  \item{higher.order.parm}{Higher-order parameters.}
+#'  \item{mvnorm.parm}{Multivariate normal distribution parameters.}
+#'  \item{LCprob.parm}{A matrix of success probabilities for each attribute mastery pattern.}
+#' }
 #'
 #' @author Haijiang Qin <Haijiang133@outlook.com>
 #'
@@ -120,6 +125,8 @@
 sim.data <- function(Q=NULL, N=NULL, IQ=list(P0=NULL, P1=NULL),
                      model="GDINA", distribute="uniform", control = NULL,
                      verbose = TRUE){
+  
+  simCall <- match.call()
 
   if(is.null(Q))
     Q <- sim.Q(5, 30)
@@ -193,5 +200,26 @@ sim.data <- function(Q=NULL, N=NULL, IQ=list(P0=NULL, P1=NULL),
   if(distribute == "uniform")
     data <- simGDINA(N, Q, gs.parm = gs, model = model,
                             gs.args = list(type = "random", mono.constraint = TRUE))
-  return(data)
+  
+   dat = data$dat
+   Q = data$Q
+   attribute = data$attribute
+   catprob.parm = data$catprob.parm
+   delta.parm = data$delta.parm
+   higher.order.parm = data$higher.order.parm
+   mvnorm.parm = data$mvnorm.parm
+   LCprob.parm = data$LCprob.parm
+   
+   out = list(dat=dat, Q=Q, 
+              attribute=attribute, 
+              catprob.parm=catprob.parm, 
+              delta.parm=delta.parm, 
+              higher.order.parm=higher.order.parm, 
+              mvnorm.parm=mvnorm.parm, 
+              LCprob.parm=LCprob.parm, 
+              call = simCall)
+   
+   class(out) <- "sim.data"
+  
+  return(out)
 }

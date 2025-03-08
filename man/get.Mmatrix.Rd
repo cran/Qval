@@ -7,17 +7,18 @@
 get.Mmatrix(K = NULL, pattern = NULL)
 }
 \arguments{
-\item{K}{The number of attributes. Can be NULL if \code{pattern} is passed to the function and is not NULL.}
+\item{K}{The number of attributes. Can be \code{NULL} if the argument \code{pattern} is not \code{NULL}.}
 
-\item{pattern}{The knowledge state matrix containing all possible attribute mastery pattern.
-Can be gained from @seealso \code{\link[GDINA]{attributepattern}}. Also can be NULL if \code{K}
-is passed to the function and is not NULL.}
+\item{pattern}{The attribute mastery pattern matrix containing all possible attribute mastery pattern.
+Can be gained from \code{\link[GDINA]{attributepattern}}. Also can be \code{NULL} if \code{K}
+is not \code{NULL}.}
 }
 \value{
 An object of class \code{matrix}.
 }
 \description{
-Calculate \eqn{\mathbf{M}} matrix for stauted CDMs (de la Torre, 2011).
+Calculate \eqn{\mathbf{M}} matrix for stauted CDMs (de la Torre, 2011). The \eqn{\mathbf{M}} matrix is a matrix used to 
+represent the interaction mechanisms between attributes.
 }
 \examples{
 

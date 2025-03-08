@@ -1,6 +1,6 @@
 
 #' @importFrom GDINA attributepattern
-correctQ.MLR <- function(Y, Q, 
+validation.MLR <- function(Y, Q, 
                          CDM.obj=NULL, method="EM", mono.constraint=TRUE, model="GDINA",
                          search.method="ESA", iter.level = "test", maxitr=20, 
                          verbose = TRUE){
@@ -12,11 +12,8 @@ correctQ.MLR <- function(Y, Q,
   pattern <- attributepattern(K)
 
   Q.MLR <- Q
-  Q.pattern.ini <- rep(2, I)
-  for(i in 1:I)
-    Q.pattern.ini[i] <- get_Pattern(Q.MLR[i, ], pattern)
-  Q.pattern <- Q.pattern.ini
-  
+  Q.pattern <- Q.pattern.ini <- apply(Q.MLR, 1, function(x) get_Pattern(x, pattern))
+
   iter <- 0
   while(iter < maxitr){
     iter <- iter + 1
@@ -44,26 +41,41 @@ correctQ.MLR <- function(Y, Q,
 
       ######################################## ESA ########################################
       if(search.method == "ESA"){
+        # Initialize variables
         fit.index.i <- rep(Inf, L)
-        q.possible <- c()
+        q.possible <- integer(0)  # Use integer() for better performance
+        fit.index.ini[i] <- Inf   # Default initialization for fit.index.ini
+        
+        # Loop to evaluate MLR for each pattern
         for(l in 2:L){
           MLR.il <- get.MLR(alpha.P, Y[, i], pattern[l, ])
-          if(all(MLR.il$p <= 0.01) && all(MLR.il$r > 0)){
-            q.possible <- c(q.possible, l)
+          val.aic <- MLR.il$aic
+          val.p <- MLR.il$p
+          val.r <- MLR.il$r
+          
+          fit.index.i[l] <- val.aic  # Store AIC for the current pattern
+          
+          if(all(val.p <= 0.01) && all(val.r > 0)){
+            q.possible <- c(q.possible, l)  # Append to q.possible if conditions are met
           }
-          fit.index.i[l] <- MLR.il$aic
-          if(l == Q.pattern.ini[i])
-            fit.index.ini[i] <- MLR.il$aic
+          
+          if(l == Q.pattern.ini[i]){
+            fit.index.ini[i] <- val.aic  # Store initial AIC if matching
+          }
         }
+        
+        # Select the best pattern based on the available options
         if(length(q.possible) > 1){
-          Q.pattern.cur[i] <- q.possible[which.min(fit.index.i[q.possible])]
+          best <- which.min(fit.index.i[q.possible])
+          Q.pattern.cur[i] <- q.possible[best]
           fit.index.cur[i] <- fit.index.i[Q.pattern.cur[i]]
-        }else if(length(q.possible) == 1){
+        } else if(length(q.possible) == 1){
           Q.pattern.cur[i] <- q.possible
           fit.index.cur[i] <- fit.index.i[q.possible]
-        }else{
-          Q.pattern.cur[i] <- which.min(fit.index.i)
-          fit.index.cur[i] <- min(fit.index.i)
+        } else {
+          best <- which.min(fit.index.i)
+          Q.pattern.cur[i] <- best
+          fit.index.cur[i] <- fit.index.i[best]
         }
       }
 

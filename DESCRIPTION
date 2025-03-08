@@ -1,8 +1,8 @@
 Package: Qval
 Type: Package
 Title: The Q-Matrix Validation Methods Framework
-Version: 1.1.1
-Date: 2025-01-10
+Version: 1.2.0
+Date: 2025-03-08
 Author: Haijiang Qin [aut, cre, cph] (<https://orcid.org/0009-0000-6721-5653>),
   Lei Guo [aut, cph] (<https://orcid.org/0000-0002-8273-3587>)
 Authors@R: c(person(given = "Haijiang", 
@@ -25,12 +25,13 @@ LinkingTo: Rcpp
 RoxygenNote: 7.3.2
 Encoding: UTF-8
 NeedsCompilation: yes
-Collate: 'beta.R' 'CDM.R' 'convex.R' 'cov.R' 'fit.R' 'GDI.R' 'Hull.R'
-        'MLR-B.R' 'MLR.R' 'MLRlasso.R' 'Mmatrix.R' 'P.R' 'Pattern.R'
-        'priority.R' 'PVAF.R' 'plot.Hull.R' 'Qvalindex.R' 'R2.R'
-        'RcppExports.R' 'Rmatrix.R' 'sim.data.R' 'sim.MQ.R' 'sim.Q.R'
-        'utils.R' 'validation.R' 'Wald.R' 'Wald.test.R' 'zzz.R'
+Collate: 'CDM.R' 'IndexBeta.R' 'IndexPriority.R' 'IndexPVAF.R'
+        'IndexR2.R' 'MLR.R' 'MLRlasso.R' 'Mmatrix.R' 'QvalBeta.R'
+        'QvalGDI.R' 'QvalHull.R' 'QvalMLRB.R' 'QvalWald.R'
+        'Qvalindex.R' 'Qvalvalidation.R' 'RcppExports.R' 'Rmatrix.R'
+        'S3.R' 'sim.Q.R' 'sim.MQ.R' 'sim.data.R' 'plot.Hull.R'
+        'convex.R' 'fit.R' 'Wald.test.R' 'utils.R' 'zzz.R'
 Repository: CRAN
 URL: https://haijiangqin.com/Qval/
-Packaged: 2025-01-09 15:39:48 UTC; Haiji
-Date/Publication: 2025-01-09 16:20:06 UTC
+Packaged: 2025-03-08 03:40:59 UTC; Haiji
+Date/Publication: 2025-03-08 04:00:02 UTC
