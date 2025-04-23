@@ -18,7 +18,7 @@ validation.beta <- function(Y, Q,
   Q.pattern <- Q.pattern.ini <- apply(Q.beta, 1, function(x) get_Pattern(x, pattern))
   
   mod0 <- NULL
-  criter.index <- match(criter, c("Deviance", "npar", "item.npar", "AIC", "BIC", "CAIC", "SABIC"))
+  criter.index <- match(criter, c("AIC", "BIC", "CAIC", "SABIC"))
   
   iter <- 0
   while(iter < maxitr){

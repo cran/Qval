@@ -11,7 +11,6 @@ validation.GDI <- function(Y, Q,
   K <- ncol(Q)
   L <- 2^K
   pattern <- attributepattern(K)
-  eps.value <- eps
 
   Q.GDI <- Q
   Q.pattern <- Q.pattern.ini <- apply(Q.GDI, 1, function(x) get_Pattern(x, pattern))
@@ -37,9 +36,11 @@ validation.GDI <- function(Y, Q,
       P.mean <- sum(P.est * P.alpha)
       
       if(eps == "logit"){
-        IQ <- 1 - P.est[1] - P.est[L]
-        eps.eq <- -0.405 + 2.867*IQ + 4.840*10^4*N - 3.316*10^3*I
+        IQ <- P.est[1] - P.est[L]
+        eps.eq <- -0.405 + 2.867*IQ + 4.840*10^(-4)*N - 3.316*10^(-3)*I
         eps.value <- exp(eps.eq) /(exp(eps.eq) + 1) 
+      }else{
+        eps.value <- eps
       }
       
       P.Xi.alpha.L <- P_GDINA(rep(1, K), P.est, pattern, P.alpha)

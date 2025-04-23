@@ -1,4 +1,4 @@
-#' Calculate over-specifcation rate (OSR)
+#' Calculate over-specification rate (OSR)
 #'
 #' @param Q.true The true Q-matrix.
 #' @param Q.sug The Q-matrix that has being validated.
@@ -160,7 +160,7 @@ zTPR <- function(Q.true, Q.orig, Q.sug) {
 }
 
 
-#' Calculate under-specifcation rate (USR)
+#' Calculate under-specification rate (USR)
 #'
 #' @param Q.true The true Q-matrix.
 #' @param Q.sug The Q-matrix that has being validated.

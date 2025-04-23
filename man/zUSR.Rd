@@ -2,7 +2,7 @@
 % Please edit documentation in R/Qvalindex.R
 \name{zUSR}
 \alias{zUSR}
-\title{Calculate under-specifcation rate (USR)}
+\title{Calculate under-specification rate (USR)}
 \usage{
 zUSR(Q.true, Q.sug)
 }
@@ -15,7 +15,7 @@ zUSR(Q.true, Q.sug)
 A numeric (USR index).
 }
 \description{
-Calculate under-specifcation rate (USR)
+Calculate under-specification rate (USR)
 }
 \details{
 The USR is defned as:

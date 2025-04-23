@@ -259,8 +259,8 @@
 CDM <- function(Y, Q, model="GDINA", method="EM",
                 mono.constraint=TRUE, maxitr=2000, verbose=1){
 
-  if(all(method != c("EM", "BM")))
-    stop("method must be 'EM' or 'BM'!!! \n")
+  if (!method %in% c("EM", "BM"))
+    stop("method must be 'EM' or 'BM'.\n")
 
   if(method == "BM" & model != "GDINA")
     stop("model must be 'GDINA' when 'BM' !!! \n")

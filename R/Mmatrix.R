@@ -22,7 +22,7 @@
 #'
 #' library(Qval)
 #'
-#' example.Mmatrix <-  get.Mmatrix(K = 5)
+#' example.Mmatrix <-  get.Mmatrix(K = 3)
 #'
 #' @export
 #' @importFrom GDINA attributepattern

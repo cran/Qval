@@ -2,7 +2,7 @@
 % Please edit documentation in R/Qvalindex.R
 \name{zOSR}
 \alias{zOSR}
-\title{Calculate over-specifcation rate (OSR)}
+\title{Calculate over-specification rate (OSR)}
 \usage{
 zOSR(Q.true, Q.sug)
 }
@@ -15,7 +15,7 @@ zOSR(Q.true, Q.sug)
 A numeric (OSR index).
 }
 \description{
-Calculate over-specifcation rate (OSR)
+Calculate over-specification rate (OSR)
 }
 \details{
 The OSR is defned as:

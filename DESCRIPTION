@@ -1,8 +1,8 @@
 Package: Qval
 Type: Package
 Title: The Q-Matrix Validation Methods Framework
-Version: 1.2.0
-Date: 2025-03-08
+Version: 1.2.1
+Date: 2025-04-22
 Author: Haijiang Qin [aut, cre, cph] (<https://orcid.org/0009-0000-6721-5653>),
   Lei Guo [aut, cph] (<https://orcid.org/0000-0002-8273-3587>)
 Authors@R: c(person(given = "Haijiang", 
@@ -33,5 +33,5 @@ Collate: 'CDM.R' 'IndexBeta.R' 'IndexPriority.R' 'IndexPVAF.R'
         'convex.R' 'fit.R' 'Wald.test.R' 'utils.R' 'zzz.R'
 Repository: CRAN
 URL: https://haijiangqin.com/Qval/
-Packaged: 2025-03-08 03:40:59 UTC; Haiji
-Date/Publication: 2025-03-08 04:00:02 UTC
+Packaged: 2025-04-23 02:06:49 UTC; Haiji
+Date/Publication: 2025-04-23 02:30:02 UTC

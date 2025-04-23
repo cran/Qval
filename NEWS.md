@@ -1,3 +1,8 @@
+# Qval 1.2.1
+
+-   Fixed - Resolved the issue occurring when `eps = 'logit'`.
+-   Fixed - Modified the manual description.
+
 # Qval 1.2.0
 
 -   Added - Separately provided beta metrics.

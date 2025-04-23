@@ -62,6 +62,10 @@
 
 
 fit <- function(Y, Q, model="GDINA"){
+  
+  if(model == "LCDM")
+    stop("Sorry! When model = 'GDINA', fit is not provided temporarily.")
+  
   GDINA.obj <- GDINA(Y, Q, model)
   cat("\n")
   testfit <- modelfit(GDINA.obj)

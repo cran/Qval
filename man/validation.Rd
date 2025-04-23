@@ -144,11 +144,11 @@ The cut-off point is denoted as \eqn{eps}, and the predicted regression equation
 \deqn{ 
 \log \left( \frac{eps}{1-eps} \right) 
    = \text{logit}(eps) 
-   = -0.405 + 2.867 \cdot IQ + 4.840 \times 10^4 \cdot N - 3.316 \times 10^3 \cdot I
+   = -0.405 + 2.867 \cdot IQ + 4.840 \times 10^{-4} \cdot N - 3.316 \times 10^{-3} \cdot I
  }
  Where \eqn{IQ} represents the question quality, calculated as the negative difference between the probability of an examinee 
  with all attributes answering the question correctly and the probability of an examinee with no attributes answering the question correctly 
- (\eqn{IQ = - \left\{ P\left( \boldsymbol{1} \right) - \left[ 1 - P\left( \boldsymbol{0} \right) \right] \right\}}), 
+ (\eqn{IQ = P\left( \boldsymbol{1} \right) - P\left( \boldsymbol{0} \right)}), 
  and \eqn{N} and \eqn{I} represent the number of examinees and the number of questions, respectively.
 }
 

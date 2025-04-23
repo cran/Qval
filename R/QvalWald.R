@@ -34,8 +34,8 @@ validation.Wald <- function(Y, Q, CDM.obj=NULL, mono.constraint = TRUE,
       P.mean <- sum(P.est * P.alpha)
       
       if(eps == "logit"){
-        IQ <- 1 - P.est[1] - P.est[L]
-        eps.eq <- -0.405 + 2.867*IQ + 4.840*10^4*N - 3.316*10^3*I
+        IQ <- P.est[1] - P.est[L]
+        eps.eq <- -0.405 + 2.867*IQ + 4.840*10^(-4)*N - 3.316*10^(-3)*I
         eps.value <- exp(eps.eq) /(exp(eps.eq) + 1) 
       }else{
         eps.value <- eps
