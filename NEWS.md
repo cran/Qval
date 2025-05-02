@@ -1,3 +1,13 @@
+# Qval 1.2.2
+
+-   Added - The `summary` method has been added for the `CDM`, `simData`, and `validation` classes.
+-   Added - The `plot` method has been added for the `CDM` and `simData` classes.
+-   Added   The `updata` method has been added for the `CDM`, `simData`, and `validation` classes.
+-   Change - Further standardized the hypothesis testing procedure for `Wald`.
+-   Change - Improved the question names for `Beta`, `Priority`, `PVAF`, and `R2` to be consistent with the original Q matrix.
+-   Fixed - Resolved the issue occurring when `method = 'beta'`.
+-   Fixed - Improved the code standards for S3 methods
+
 # Qval 1.2.1
 
 -   Fixed - Resolved the issue occurring when `eps = 'logit'`.

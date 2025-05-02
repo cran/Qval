@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim.MQ.R
 \name{sim.MQ}
 \alias{sim.MQ}
-\title{Simulate mis-specifications in the Q-matrix}
+\title{Simulate Mis-specifications in Q-matrix}
 \usage{
 sim.MQ(Q, rate, verbose = TRUE)
 }

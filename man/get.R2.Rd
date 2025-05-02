@@ -2,7 +2,7 @@
 % Please edit documentation in R/IndexR2.R
 \name{get.R2}
 \alias{get.R2}
-\title{Calculate McFadden pseudo-R2}
+\title{Calculate McFadden Pseudo-R2}
 \usage{
 get.R2(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA")
 }
@@ -15,7 +15,7 @@ master the items. The \code{i}th row of the matrix is a binary indicator vector 
 attributes are not required (coded by 0) and which attributes are required (coded by 1) to master
 item \eqn{i}.}
 
-\item{CDM.obj}{An object of class \code{CDM.obj}. Can can be NULL, but when it is not NULL, it
+\item{CDM.obj}{An object of class \code{CDM.obj}. Can be NULL, but when it is not NULL, it
 enables rapid verification of the Q-matrix without the need for parameter estimation.
 @seealso \code{\link[Qval]{CDM}}.}
 
@@ -58,6 +58,7 @@ to item \eqn{i} across all \eqn{N} examinees; then \eqn{\log(L_{i0})} could be c
 }
 }
 \examples{
+\donttest{
 library(Qval)
 
 set.seed(123)
@@ -65,21 +66,22 @@ set.seed(123)
 ## generate Q-matrix and data
 K <- 3
 I <- 20
-example.Q <- sim.Q(K, I)
+Q <- sim.Q(K, I)
 IQ <- list(
   P0 = runif(I, 0.0, 0.2),
   P1 = runif(I, 0.8, 1.0)
 )
-example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
+data <- sim.data(Q = Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
 
 ## calculate R2 directly
-R2 <-get.R2(Y = example.data$dat, Q = example.Q)
+R2 <-get.R2(Y = data$dat, Q = Q)
 print(R2)
 
 ## calculate R2 after fitting CDM
-example.CDM.obj <- CDM(example.data$dat, example.Q, model="GDINA")
-R2 <-get.R2(CDM.obj = example.CDM.obj)
+CDM.obj <- CDM(data$dat, Q, model="GDINA")
+R2 <-get.R2(CDM.obj = CDM.obj)
 print(R2)
+}
 
 }
 \references{

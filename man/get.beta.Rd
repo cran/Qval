@@ -48,6 +48,7 @@ item incorrectly in that state. Therefore, to some extent, \eqn{\beta_{jc}} can 
 of discriminability.
 }
 \examples{
+\donttest{
 library(Qval)
 
 set.seed(123)
@@ -55,23 +56,24 @@ set.seed(123)
 ## generate Q-matrix and data
 K <- 3
 I <- 20
-example.Q <- sim.Q(K, I)
+Q <- sim.Q(K, I)
 IQ <- list(
   P0 = runif(I, 0.0, 0.2),
   P1 = runif(I, 0.8, 1.0)
 )
 
 model <- "DINA"
-example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ, model = model, distribute = "horder")
+data <- sim.data(Q = Q, N = 500, IQ = IQ, model = model, distribute = "horder")
 
 ## calculate beta directly
-beta <-get.beta(Y = example.data$dat, Q = example.Q, model = model)
+beta <-get.beta(Y = data$dat, Q = Q, model = model)
 print(beta)
 
 ## calculate beta after fitting CDM
-example.CDM.obj <- CDM(example.data$dat, example.Q, model=model)
-beta <-get.beta(CDM.obj = example.CDM.obj)
+CDM.obj <- CDM(data$dat, Q, model=model)
+beta <-get.beta(CDM.obj = CDM.obj)
 print(beta)
+}
 
 }
 \references{

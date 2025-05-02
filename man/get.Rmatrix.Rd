@@ -2,7 +2,7 @@
 % Please edit documentation in R/Rmatrix.R
 \name{get.Rmatrix}
 \alias{get.Rmatrix}
-\title{Restriction matrix}
+\title{Restriction Matrix}
 \usage{
 get.Rmatrix(q1, q2)
 }
@@ -32,4 +32,7 @@ print(Rmatrix)
 de la Torre, J. (2011). The Generalized DINA Model Framework. Psychometrika, 76(2), 179-199. DOI: 10.1007/s11336-011-9207-7.
 
 Ma, W., & de la Torre, J. (2020). An empirical Q-matrix validation method for the sequential generalized DINA model. British Journal of Mathematical and Statistical Psychology, 73(1), 142-163. DOI: 10.1111/bmsp.12156.
+}
+\seealso{
+\code{\link[Qval]{Wald.test}}
 }

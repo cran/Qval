@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim.data.R
 \name{sim.data}
 \alias{sim.data}
-\title{generate response}
+\title{Generate Response}
 \usage{
 sim.data(
   Q = NULL,
@@ -85,9 +85,9 @@ IQ <- list(
   P1 = runif(I, 0.8, 1.0)
 )
 
-data <- sim.data(Q = Q, N = 10, IQ=IQ, model = "GDINA", distribute = "uniform")
+data.obj <- sim.data(Q = Q, N = 100, IQ=IQ, model = "GDINA", distribute = "uniform")
 
-print(data$dat)
+print(data.obj$dat)
 
 ################################################################
 #                           Example 2                          #
@@ -103,11 +103,11 @@ IQ <- list(
   P1 = runif(I, 0.8, 1.0)
 )
 
-example_cutoffs <- sample(qnorm(c(1:K)/(K+1)), ncol(Q))
-data <- sim.data(Q = Q, N = 10, IQ=IQ, model = "GDINA", distribute = "mvnorm",
-                 control = list(sigma = 0.5, cutoffs = example_cutoffs))
+cutoffs <- sample(qnorm(c(1:K)/(K+1)), ncol(Q))
+data.obj <- sim.data(Q = Q, N = 10, IQ=IQ, model = "GDINA", distribute = "mvnorm",
+                 control = list(sigma = 0.5, cutoffs = cutoffs))
 
-print(data$dat)
+print(data.obj$dat)
 
 #################################################################
 #                            Example 3                          #
@@ -123,12 +123,12 @@ IQ <- list(
   P1 = runif(I, 0.8, 1.0)
 )
 
-example_theta <- rnorm(10, 0, 1)
-example_b <- seq(-1.5,1.5,length.out=K)
-data <- sim.data(Q = Q, N = 10, IQ=IQ, model = "GDINA", distribute = "horder",
-                 control = list(theta = example_theta, a = 1.5, b = example_b))
+theta <- rnorm(10, 0, 1)
+b <- seq(-1.5,1.5,length.out=K)
+data.obj <- sim.data(Q = Q, N = 10, IQ=IQ, model = "GDINA", distribute = "horder",
+                 control = list(theta = theta, a = 1.5, b = b))
 
-print(data$dat)
+print(data.obj$dat)
 
 }
 \references{

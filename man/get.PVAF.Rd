@@ -2,7 +2,7 @@
 % Please edit documentation in R/IndexPVAF.R
 \name{get.PVAF}
 \alias{get.PVAF}
-\title{Calculate \eqn{PVAF}}
+\title{Calculate PVAF}
 \usage{
 get.PVAF(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA")
 }
@@ -15,9 +15,8 @@ master the items. The \code{i}th row of the matrix is a binary indicator vector 
 attributes are not required (coded by 0) and which attributes are required (coded by 1) to master
 item \eqn{i}.}
 
-\item{CDM.obj}{An object of class \code{CDM.obj}. Can can be \code{NULL}, but when it is not \code{NULL}, it enables
-rapid verification of the Q-matrix without the need for parameter estimation.
-@seealso \code{\link[Qval]{CDM}}.}
+\item{CDM.obj}{An object of class \code{CDM.obj}. Can be \code{NULL}, but when it is not \code{NULL}, it enables
+rapid verification of the Q-matrix without the need for parameter estimation.}
 
 \item{model}{Type of model to be fitted; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"},
 \code{"ACDM"}, \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.}
@@ -27,7 +26,7 @@ An object of class \code{matrix}, which consisted of \eqn{PVAF} for each item an
 }
 \description{
 The function is able to calculate the proportion of variance accounted for (\eqn{PVAF}) for all items
-after fitting \code{CDM} or directly.
+after fitting \code{\link[Qval]{CDM}} or directly.
 }
 \details{
 The intrinsic essence of the GDI index (as denoted by \eqn{\zeta_{2}}) is the weighted variance of
@@ -52,6 +51,7 @@ Thus, \eqn{\zeta^{2} / \zeta_{max}^{2}} is computed to indicate the proportion o
 called the \eqn{PVAF}.
 }
 \examples{
+\donttest{
 library(Qval)
 
 set.seed(123)
@@ -59,21 +59,22 @@ set.seed(123)
 ## generate Q-matrix and data
 K <- 3
 I <- 20
-example.Q <- sim.Q(K, I)
+Q <- sim.Q(K, I)
 IQ <- list(
   P0 = runif(I, 0.0, 0.2),
   P1 = runif(I, 0.8, 1.0)
 )
-example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
+data <- sim.data(Q = Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
 
 ## calculate PVAF directly
-PVAF <-get.PVAF(Y = example.data$dat, Q = example.Q)
+PVAF <-get.PVAF(Y = data$dat, Q = Q)
 print(PVAF)
 
 ## calculate PVAF after fitting CDM
-example.CDM.obj <- CDM(example.data$dat, example.Q, model="GDINA")
-PVAF <-get.PVAF(CDM.obj = example.CDM.obj)
+CDM.obj <- CDM(data$dat, Q, model="GDINA")
+PVAF <-get.PVAF(CDM.obj = CDM.obj)
 print(PVAF)
+}
 
 }
 \references{

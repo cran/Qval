@@ -1,8 +1,8 @@
-#' Calculate \eqn{PVAF}
+#' Calculate PVAF
 #'
 #' @description
 #' The function is able to calculate the proportion of variance accounted for (\eqn{PVAF}) for all items
-#' after fitting \code{CDM} or directly.
+#' after fitting \code{\link[Qval]{CDM}} or directly.
 #'
 #' @param Y A required \eqn{N} × \eqn{I} matrix or \code{data.frame} consisting of the responses of \code{N} individuals
 #'          to \eqn{N} × \eqn{I} items. Missing values need to be coded as \code{NA}.
@@ -10,9 +10,8 @@
 #'          master the items. The \code{i}th row of the matrix is a binary indicator vector indicating which
 #'          attributes are not required (coded by 0) and which attributes are required (coded by 1) to master
 #'          item \eqn{i}.
-#' @param CDM.obj An object of class \code{CDM.obj}. Can can be \code{NULL}, but when it is not \code{NULL}, it enables
+#' @param CDM.obj An object of class \code{CDM.obj}. Can be \code{NULL}, but when it is not \code{NULL}, it enables
 #'                rapid verification of the Q-matrix without the need for parameter estimation.
-#'                @seealso \code{\link[Qval]{CDM}}.
 #' @param model Type of model to be fitted; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"},
 #'              \code{"ACDM"}, \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.
 #'
@@ -50,6 +49,7 @@
 #' de la Torre, J., & Chiu, C. Y. (2016). A General Method of Empirical Q-matrix Validation. Psychometrika, 81(2), 253-273. DOI: 10.1007/s11336-015-9467-8.
 #'
 #' @examples
+#' \donttest{
 #' library(Qval)
 #'
 #' set.seed(123)
@@ -57,21 +57,22 @@
 #' ## generate Q-matrix and data
 #' K <- 3
 #' I <- 20
-#' example.Q <- sim.Q(K, I)
+#' Q <- sim.Q(K, I)
 #' IQ <- list(
 #'   P0 = runif(I, 0.0, 0.2),
 #'   P1 = runif(I, 0.8, 1.0)
 #' )
-#' example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
+#' data <- sim.data(Q = Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
 #'
 #' ## calculate PVAF directly
-#' PVAF <-get.PVAF(Y = example.data$dat, Q = example.Q)
+#' PVAF <-get.PVAF(Y = data$dat, Q = Q)
 #' print(PVAF)
 #'
 #' ## calculate PVAF after fitting CDM
-#' example.CDM.obj <- CDM(example.data$dat, example.Q, model="GDINA")
-#' PVAF <-get.PVAF(CDM.obj = example.CDM.obj)
+#' CDM.obj <- CDM(data$dat, Q, model="GDINA")
+#' PVAF <-get.PVAF(CDM.obj = CDM.obj)
 #' print(PVAF)
+#' }
 #'
 #' @export
 #' @importFrom GDINA attributepattern
@@ -105,7 +106,11 @@ get.PVAF <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA"){
   
   # Assign column and row names
   colnames(PVAF) <- pattern.names
-  rownames(PVAF) <- paste0("item ", 1:I)
+  if(!is.null(rownames(Q))){
+    rownames(PVAF) <- rownames(Q)
+  }else{
+    rownames(PVAF) <- paste0("item ", 1:I)
+  }
 
   if(is.null(CDM.obj))
       CDM.obj <- CDM(Y=Y, Q=Q, model=model)

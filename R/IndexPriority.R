@@ -42,6 +42,8 @@
 #' @param model Type of model to fit; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"}
 #'              , \code{"ACDM"}, \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.
 #'              @seealso \code{\link[Qval]{CDM}}.
+#' 
+#' @seealso \code{\link[Qval]{validation}}
 #'              
 #' @returns A matrix containing all attribute priorities.
 #' 
@@ -52,6 +54,7 @@
 #' Tu, D., Chiu, J., Ma, W., Wang, D., Cai, Y., & Ouyang, X. (2022). A multiple logistic regression-based (MLR-B) Q-matrix validation method for cognitive diagnosis models: A confirmatory approach. Behavior Research Methods. DOI: 10.3758/s13428-022-01880-x.
 #'
 #' @examples
+#' \donttest{
 #' set.seed(123)
 #' library(Qval)
 #' 
@@ -63,7 +66,6 @@
 #'   P1 = runif(I, 0.7, 0.9)
 #' )
 #' 
-#' \donttest{
 #' Q <- sim.Q(K, I)
 #' data <- sim.data(Q = Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
 #' MQ <- sim.MQ(Q, 0.1)
@@ -83,7 +85,6 @@ get.priority <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model="GDINA") {
   if (is.null(CDM.obj) & (is.null(Y) | is.null(Q)))
     stop("One of [CDM.obj] and [Y, Q] must not be NULL !!!")
   
-  # If Q is not NULL, extract related information; otherwise, extract from CDM.obj
   if (!is.null(Q)) {
     I <- nrow(Q)
   } else {
@@ -100,7 +101,11 @@ get.priority <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model="GDINA") {
   
   # Pre-allocate the priority matrix
   priority <- matrix(NA, nrow = I, ncol = ncol(Q))
-  rownames(priority) <- rownames(Q)
+  if(!is.null(rownames(Q))){
+    rownames(priority) <- rownames(Q)
+  }else{
+    rownames(priority) <- paste0("item ", 1:I)
+  }
   colnames(priority) <- colnames(Q)
   
   # Process each column of the matrix using a loop

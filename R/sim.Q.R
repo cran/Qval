@@ -1,4 +1,4 @@
-#' generate a random Q-matrix
+#' Generate a Random Q-matrix
 #'
 #' @description
 #' generate a \eqn{I} × \eqn{K} Q-matrix randomly, which consisted of one-attribute q-vectors

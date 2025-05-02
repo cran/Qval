@@ -1,6 +1,6 @@
 
 #' 
-#' Restriction matrix
+#' Restriction Matrix
 #' 
 #' @description
 #' This function returns the restriction matrix (de la Torre, 2011; Ma & de la Torre, 2020) based on two q-vectors, 
@@ -8,6 +8,8 @@
 #' 
 #' @param q1 A q-vector
 #' @param q2 Another q-vector
+#' 
+#' @seealso \code{\link[Qval]{Wald.test}}
 #' 
 #' @return A restriction matrix
 #' 

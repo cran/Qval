@@ -1,4 +1,4 @@
-#' Calculate McFadden pseudo-R2
+#' Calculate McFadden Pseudo-R2
 #'
 #' @description
 #' The function is able to calculate the McFadden pseudo-\eqn{R^{2}} (\eqn{R^{2}}) for all items after
@@ -10,7 +10,7 @@
 #'          master the items. The \code{i}th row of the matrix is a binary indicator vector indicating which
 #'          attributes are not required (coded by 0) and which attributes are required (coded by 1) to master
 #'          item \eqn{i}.
-#' @param CDM.obj An object of class \code{CDM.obj}. Can can be NULL, but when it is not NULL, it
+#' @param CDM.obj An object of class \code{CDM.obj}. Can be NULL, but when it is not NULL, it
 #'                enables rapid verification of the Q-matrix without the need for parameter estimation.
 #'                @seealso \code{\link[Qval]{CDM}}.
 #' @param model Type of model to fit; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"},
@@ -60,6 +60,7 @@
 #' Qin, H., & Guo, L. (2023). Using machine learning to improve Q-matrix validation. Behavior Research Methods. DOI: 10.3758/s13428-023-02126-0.
 #'
 #' @examples
+#' \donttest{
 #' library(Qval)
 #'
 #' set.seed(123)
@@ -67,21 +68,22 @@
 #' ## generate Q-matrix and data
 #' K <- 3
 #' I <- 20
-#' example.Q <- sim.Q(K, I)
+#' Q <- sim.Q(K, I)
 #' IQ <- list(
 #'   P0 = runif(I, 0.0, 0.2),
 #'   P1 = runif(I, 0.8, 1.0)
 #' )
-#' example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
+#' data <- sim.data(Q = Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
 #'
 #' ## calculate R2 directly
-#' R2 <-get.R2(Y = example.data$dat, Q = example.Q)
+#' R2 <-get.R2(Y = data$dat, Q = Q)
 #' print(R2)
 #'
 #' ## calculate R2 after fitting CDM
-#' example.CDM.obj <- CDM(example.data$dat, example.Q, model="GDINA")
-#' R2 <-get.R2(CDM.obj = example.CDM.obj)
+#' CDM.obj <- CDM(data$dat, Q, model="GDINA")
+#' R2 <-get.R2(CDM.obj = CDM.obj)
 #' print(R2)
+#' }
 #'
 #' @export
 #' @importFrom GDINA attributepattern
@@ -138,7 +140,11 @@ get.R2 <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA") {
   # Assign column and row names
   pattern.names <- apply(pattern, 1, paste, collapse = "")
   colnames(R2) <- pattern.names
-  rownames(R2) <- paste0("item ", 1:I)
+  if(!is.null(rownames(Q))){
+    rownames(R2) <- rownames(Q)
+  }else{
+    rownames(R2) <- paste0("item ", 1:I)
+  }
   
   return(R2)
 }

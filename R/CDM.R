@@ -1,8 +1,8 @@
-#' Parameter estimation for cognitive diagnosis models (CDMs) by MMLE/EM or MMLE/BM algorithm.
+#' Parameter Estimation for Cognitive Diagnosis Models (CDMs) by MMLE/EM or MMLE/BM Algorithm.
 #'
 #' @description
 #' A function to estimate parameters for cognitive diagnosis models by MMLE/EM (de la Torre, 2009; de la Torre, 2011)
-#' or MMLE/BM (Ma & Jiang, 2020) algorithm.The function imports various functions from the \code{GDINA} package,
+#' or MMLE/BM (Ma & Jiang, 2020) algorithm. The function imports various functions from the \code{GDINA} package,
 #' parameter estimation for Cognitive Diagnostic Models (CDMs) was performed and extended. The \code{CDM} function not
 #' only accomplishes parameter estimation for most commonly used models (e.g., \code{GDINA}, \code{DINA}, \code{DINO},
 #' \code{ACDM}, \code{LLM}, or \code{rRUM}). Furthermore, it incorporates Bayes modal estimation
@@ -18,7 +18,7 @@
 #' @param model Type of model to be fitted; can be \code{"GDINA"}, \code{"LCDM"}, \code{"DINA"}, \code{"DINO"}, \code{"ACDM"},
 #'            \code{"LLM"}, or \code{"rRUM"}. Default = \code{"GDINA"}.
 #' @param method  Type of method to estimate CDMs' parameters; one out of \code{"EM"} and \code{"BM"}. Default = \code{"EM"}. 
-#'                However, \code{"BM"} is only avaible when \code{method = "GDINA"}.
+#'                However, \code{"BM"} is only available when \code{method = "GDINA"}.
 #' @param mono.constraint Logical indicating whether monotonicity constraints should be fulfilled in estimation.
 #'                        Default = \code{TRUE}.
 #' @param maxitr A vector for each item or nonzero category, or a scalar which will be used for all items
@@ -141,6 +141,7 @@
 #'  \item{alpha.P}{Individuals' marginal mastery probabilities matrix}
 #'  \item{P.alpha}{Attribute prior weights for calculating marginalized likelihood in the last iteration}
 #'  \item{model.fit}{Some basic model-fit indeces, including \code{Deviance}, \code{npar}, \code{AIC}, \code{BIC}. @seealso \code{\link[Qval]{fit}}}
+#'  \item{arguments}{A list containing all input arguments}
 #' }
 #' 
 #'
@@ -183,17 +184,17 @@
 #' ## generate Q-matrix and data to fit
 #' K <- 3
 #' I <- 30
-#' example.Q <- sim.Q(K, I)
+#' Q <- sim.Q(K, I)
 #' IQ <- list(
 #'   P0 = runif(I, 0.0, 0.2),
 #'   P1 = runif(I, 0.8, 1.0)
 #' )
-#' example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ,
+#' data.obj <- sim.data(Q = Q, N = 500, IQ = IQ,
 #'                          model = "GDINA", distribute = "horder")
 #'
 #'
 #' ## using MMLE/EM to fit GDINA model
-#' example.CDM.obj <- CDM(example.data$dat, example.Q, model = "GDINA",
+#' CDM.obj <- CDM(data.obj$dat, Q, model = "GDINA",
 #'                        method = "EM", maxitr = 2000, verbose = 1)
 #'
 #'
@@ -202,6 +203,7 @@
 #'#                           Example 2                          #
 #'#               fit using MMLE/BM to fit the DINA              #
 #'################################################################
+#' \donttest{
 #' set.seed(123)
 #'
 #' library(Qval)
@@ -209,24 +211,24 @@
 #' ## generate Q-matrix and data to fit
 #' K <- 5
 #' I <- 30
-#' example.Q <- sim.Q(K, I)
+#' Q <- sim.Q(K, I)
 #' IQ <- list(
 #'   P0 = runif(I, 0.0, 0.2),
 #'   P1 = runif(I, 0.8, 1.0)
 #' )
-#' example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ,
-#'                          model = "DINA", distribute = "horder")
+#' data.obj <- sim.data(Q = Q, N = 500, IQ = IQ,
+#'                  model = "DINA", distribute = "horder")
 #'
-#'\donttest{
 #' ## using MMLE/BM to fit GDINA model
-#' example.CDM.obj <- CDM(example.data$dat, example.Q, model = "GDINA",
-#'                        method = "BM", maxitr = 1000, verbose = 2)
+#' CDM.obj <- CDM(data.obj$dat, Q, model = "GDINA",
+#'                method = "BM", maxitr = 1000, verbose = 2)
 #'}
 #'
 #'################################################################
 #'#                           Example 3                          #
 #'#              fit using MMLE/EM to fit the ACDM               #
 #'################################################################
+#' \donttest{
 #' set.seed(123)
 #'
 #' library(Qval)
@@ -234,18 +236,17 @@
 #' ## generate Q-matrix and data to fit
 #' K <- 5
 #' I <- 30
-#' example.Q <- sim.Q(K, I)
+#' Q <- sim.Q(K, I)
 #' IQ <- list(
 #'   P0 = runif(I, 0.0, 0.2),
 #'   P1 = runif(I, 0.8, 1.0)
 #' )
-#' example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ,
-#'                          model = "ACDM", distribute = "horder")
+#' data.obj <- sim.data(Q = Q, N = 500, IQ = IQ,
+#'                  model = "ACDM", distribute = "horder")
 #'
-#'\donttest{
 #' ## using MMLE/EM to fit GDINA model
-#' example.CDM.obj <- CDM(example.data$dat, example.Q, model = "ACDM",
-#'                        method = "EM", maxitr = 2000, verbose = 1)
+#' CDM.obj <- CDM(data.obj$dat, Q, model = "ACDM",
+#'                method = "EM", maxitr = 2000, verbose = 1)
 #'}
 #'
 #' @export
@@ -420,14 +421,20 @@ CDM <- function(Y, Q, model="GDINA", method="EM",
     if(verbose != 0)
       cat("\n")
   }
-
+  
+  modelfit <- c(Deviance=CDM.obj$testfit$Deviance,
+                npar=CDM.obj$testfit$npar,
+                AIC=CDM.obj$testfit$AIC,
+                BIC=CDM.obj$testfit$BIC)
+  
   res <- list(analysis.obj=CDM.obj, alpha=alpha, P.alpha.Xi=P.alpha.Xi,
               alpha.P=alpha.P, P.alpha=P.alpha,
-              model.fit=data.frame(Deviance=CDM.obj$testfit$Deviance,
-                                   npar=CDM.obj$testfit$npar,
-                                   AIC=CDM.obj$testfit$AIC,
-                                   BIC=CDM.obj$testfit$BIC), 
-              call = CDMcall)
+              model.fit=modelfit, 
+              call = CDMcall, 
+              arguments = list(
+                Y=Y, Q=Q, model=model, method=method,
+                mono.constraint=mono.constraint, maxitr=maxitr, verbose=verbose
+              ))
 
   class(res) <- "CDM"
 

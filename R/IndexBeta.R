@@ -48,6 +48,7 @@
 #' Li, J., & Chen, P. (2024). A new Q-matrix validation method based on signal detection theory. British Journal of Mathematical and Statistical Psychology, 00, 1–33. DOI: 10.1111/bmsp.12371
 #'
 #' @examples
+#' \donttest{
 #' library(Qval)
 #' 
 #' set.seed(123)
@@ -55,23 +56,24 @@
 #' ## generate Q-matrix and data
 #' K <- 3
 #' I <- 20
-#' example.Q <- sim.Q(K, I)
+#' Q <- sim.Q(K, I)
 #' IQ <- list(
 #'   P0 = runif(I, 0.0, 0.2),
 #'   P1 = runif(I, 0.8, 1.0)
 #' )
 #' 
 #' model <- "DINA"
-#' example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ, model = model, distribute = "horder")
+#' data <- sim.data(Q = Q, N = 500, IQ = IQ, model = model, distribute = "horder")
 #'
 #' ## calculate beta directly
-#' beta <-get.beta(Y = example.data$dat, Q = example.Q, model = model)
+#' beta <-get.beta(Y = data$dat, Q = Q, model = model)
 #' print(beta)
 #'
 #' ## calculate beta after fitting CDM
-#' example.CDM.obj <- CDM(example.data$dat, example.Q, model=model)
-#' beta <-get.beta(CDM.obj = example.CDM.obj)
+#' CDM.obj <- CDM(data$dat, Q, model=model)
+#' beta <-get.beta(CDM.obj = CDM.obj)
 #' print(beta)
+#' }
 #'
 #' @export
 #' @importFrom GDINA attributepattern
@@ -101,7 +103,7 @@ get.beta <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA"){
   }
   
   # Create beta matrix
-  beta <- matrix(NA, I, L)
+  beta <- matrix(0, I, L)
   
   # Generate pattern names efficiently using apply and paste
   pattern <- attributepattern(K)
@@ -109,7 +111,11 @@ get.beta <- function(Y = NULL, Q = NULL, CDM.obj = NULL, model = "GDINA"){
   
   # Assign column and row names
   colnames(beta) <- pattern.names
-  rownames(beta) <- paste0("item ", 1:I)
+  if(!is.null(rownames(Q))){
+    rownames(beta) <- rownames(Q)
+  }else{
+    rownames(beta) <- paste0("item ", 1:I)
+  }
   
   if(is.null(CDM.obj))
     CDM.obj <- CDM(Y=Y, Q=Q, model=model)

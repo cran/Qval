@@ -18,15 +18,17 @@
 # example.data <- sim.data(Q = example.Q, N = 1000, IQ = IQ, model = model, distribute = "horder")
 # Y <- example.data$dat
 # 
-# # simulate random mis-specifications
+# ## simulate random mis-specifications
 # Q <- example.MQ <- sim.MQ(example.Q, 0.2)
-
-# # using MMLE/EM to fit CDM model first
+# 
+# ## using MMLE/EM to fit CDM model first
 # CDM.obj <- example.CDM.obj <- CDM(example.data$dat, example.MQ, model = model)
 # fit <- GDINA.obj <- example.CDM.obj$analysis.obj
 
-# Q.beta.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, method = "beta", search.method = "PAA", criter="AIC", iter.level = "test.att", maxitr = 1)
-# Q.beta.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, method = "beta", search.method = "beta", criter="BIC", iter.level = "test", maxitr = 20)
+# Q.beta.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, method = "beta", 
+#                          search.method = "PAA", criter="AIC", iter.level = "test.att", maxitr = 1)
+# Q.beta.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, method = "beta",
+#                          search.method = "beta", criter="BIC", iter.level = "test", maxitr = 1)
 # print(zQRR(example.Q, Q.beta.obj$Q.sug))
 
 # Q.GDI.obj <- validation(example.data$dat, example.MQ, example.CDM.obj, model = model, method = "GDI", eps = "logit", search.method="ESA", iter.level = "test", maxitr = 1)

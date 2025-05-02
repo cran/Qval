@@ -56,6 +56,7 @@ and \eqn{\lambda} is the tuning parameter for penalization (a larger value impos
 The priority for attribute \eqn{i} is defined as: \eqn{\boldsymbol{priority}_i = \boldsymbol{\beta}_i = [\beta_{i1}, \ldots, \beta_{ik}, \ldots, \beta_{iK}]}
 }
 \examples{
+\donttest{
 set.seed(123)
 library(Qval)
 
@@ -67,7 +68,6 @@ IQ <- list(
   P1 = runif(I, 0.7, 0.9)
 )
 
-\donttest{
 Q <- sim.Q(K, I)
 data <- sim.data(Q = Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
 MQ <- sim.MQ(Q, 0.1)
@@ -84,4 +84,7 @@ head(priority)
 Qin, H., & Guo, L. (2025). Priority attribute algorithm for Q-matrix validation: A didactic. Behavior Research Methods, 57(1), 31. DOI: 10.3758/s13428-024-02547-5.
 
 Tu, D., Chiu, J., Ma, W., Wang, D., Cai, Y., & Ouyang, X. (2022). A multiple logistic regression-based (MLR-B) Q-matrix validation method for cognitive diagnosis models: A confirmatory approach. Behavior Research Methods. DOI: 10.3758/s13428-022-01880-x.
+}
+\seealso{
+\code{\link[Qval]{validation}}
 }

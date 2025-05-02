@@ -4,11 +4,11 @@
 # working_directory <- dirname(dirname(script_path))
 # setwd(working_directory)
 
+# pkgdown::build_site()
+# 
 # devtools::document()
 # devtools::build_manual()
-
-# pkgdown::build_site()
-#
+# 
 # devtools::build()
 # devtools::check(manual = TRUE)
 #
@@ -17,13 +17,15 @@
 # devtools::check_rhub()
 #
 # devtools::check_win_devel()
+
+# devtools::release()
+
 #
 # NEWS.md
 # DESCRIPTION
 # cran-comments.md
-#
-# devtools::release()
-#
+# 
+# 
 # pack <- available.packages()
 #
 # which(rownames(pack) == "Qval")

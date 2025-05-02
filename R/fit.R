@@ -1,4 +1,4 @@
-#' Calculate fit indeces
+#' Calculate Fit Indices
 #'
 #' @description
 #' Calculate relative fit indices (-2LL, AIC, BIC, CAIC, SABIC) and absolute fit indices (\eqn{M_2} test, \eqn{RMSEA_2}, SRMSR) 
@@ -37,6 +37,7 @@
 #' Ravand, H., & Robitzsch, A. (2018). Cognitive diagnostic model of best choice: a study of reading comprehension. Educational Psychology, 38, 1255–1277. DOI: 10.1080/01443410.2018.1489524.
 #'
 #' @examples
+#' \donttest{
 #' set.seed(123)
 #'
 #' library(Qval)
@@ -44,16 +45,17 @@
 #' ## generate Q-matrix and data to fit
 #' K <- 5
 #' I <- 30
-#' example.Q <- sim.Q(K, I)
+#' Q <- sim.Q(K, I)
 #' IQ <- list(
 #'   P0 = runif(I, 0.0, 0.2),
 #'   P1 = runif(I, 0.8, 1.0)
 #' )
-#' example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
+#' data <- sim.data(Q = Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
 #'
 #' ## calculate fit indices
-#' fit.indices <- fit(Y = example.data$dat, Q = example.Q, model = "GDINA")
+#' fit.indices <- fit(Y = data$dat, Q = Q, model = "GDINA")
 #' print(fit.indices)
+#' }
 #'
 #' @export
 #' @importFrom GDINA GDINA

@@ -3,10 +3,10 @@
 #' @import parallel
 #'
 validation.beta <- function(Y, Q, 
-                          CDM.obj=NULL, method="EM", mono.constraint=TRUE, model="GDINA",
-                          search.method="beta", maxitr=1, iter.level="test", 
-                          criter="AIC", 
-                          verbose = TRUE){
+                            CDM.obj=NULL, method="EM", mono.constraint=TRUE, model="GDINA",
+                            search.method="beta", maxitr=1, iter.level="test", 
+                            criter="AIC", 
+                            verbose = TRUE){
   
   N <- nrow(Y)
   I <- nrow(Q)
@@ -18,12 +18,13 @@ validation.beta <- function(Y, Q,
   Q.pattern <- Q.pattern.ini <- apply(Q.beta, 1, function(x) get_Pattern(x, pattern))
   
   mod0 <- NULL
-  criter.index <- match(criter, c("AIC", "BIC", "CAIC", "SABIC"))
+  ## The order of matching here needs to align with the order in the fit and cannot be altered.
+  criter.index <- match(criter, c("Deviance", "npar", "item.npar", "AIC", "BIC", "CAIC", "SABIC"))
   
   iter <- 0
   while(iter < maxitr){
     iter <- iter + 1
-
+    
     if(iter != 1 | is.null(CDM.obj)){
       CDM.obj <- CDM(Y, Q.beta, method=method, mono.constraint=mono.constraint, model=model, verbose = 0)
     }
@@ -36,7 +37,7 @@ validation.beta <- function(Y, Q,
     beta_Ni_ri.obj <- beta_Ni_ri(pattern, AMP, Y)
     ri <- beta_Ni_ri.obj$ri
     Ni <- beta_Ni_ri.obj$Ni
-
+    
     QvalEnv <- new.env()
     assign("Y", Y, envir = QvalEnv)
     assign("criter.index", criter.index, envir = QvalEnv)
@@ -57,7 +58,7 @@ validation.beta <- function(Y, Q,
     assign("get.MLRlasso", get.MLRlasso, envir = QvalEnv)
     assign("parallel_iter", parallel_iter, envir = QvalEnv)
     assign("parLapply", parLapply, envir = QvalEnv)
-
+    
     cl <- makeCluster(detectCores() - 1)
     clusterExport(cl, c("Y", "P.alpha.Xi", "P.alpha", "pattern", "ri", "Ni", "Q.pattern.ini", "model", "criter",
                         "search.method", "P_GDINA", "Q.beta", "L", "K", "alpha.P", "get.MLRlasso"),
@@ -225,7 +226,7 @@ parallel_iter <- function(i, Y, criter.index, P.alpha.Xi, P.alpha, pattern, ri, 
     att.max <- which.max(beta)
     att.min <- which.min(beta)
     pattern.search <- which(pattern[, att.max] == 1 & pattern[, att.min] == 0 | rowSums(pattern) == K)
-
+    
     ## search q-vectors in search space
     pattern.sum <- rowSums(pattern[pattern.search, ])
     fit.index.temp <- sapply(1:length(pattern.search), function(l) {
@@ -240,11 +241,11 @@ parallel_iter <- function(i, Y, criter.index, P.alpha.Xi, P.alpha, pattern, ri, 
       
       return(mod0[criter.index])
     })
-
+    
     q.possible <- pattern.search[which.min(fit.index.temp)]
     result$fit.index.cur <- fit.index.temp[which.min(fit.index.temp)]
   }
-
+  
   ######################################## ESA ########################################
   if (search.method == "ESA") {
     pattern.sum <- rowSums(pattern[1:L, ])
@@ -260,11 +261,11 @@ parallel_iter <- function(i, Y, criter.index, P.alpha.Xi, P.alpha, pattern, ri, 
       
       return(mod0[criter.index])
     })
-
+    
     q.possible <- which.min(fit.index.i) + 1
     result$fit.index.cur <- fit.index.i[q.possible]
   }
-
+  
   ######################################## SSA ########################################
   if (search.method == "SSA") {
     Q.i <- rep(0, K)
@@ -303,7 +304,7 @@ parallel_iter <- function(i, Y, criter.index, P.alpha.Xi, P.alpha, pattern, ri, 
     }
     result$fit.index.cur <- fit.index.i
   }
-
+  
   ######################################## PAA ########################################
   if (search.method == "PAA") {
     priority.cur <- get.MLRlasso(alpha.P, Y[, i])

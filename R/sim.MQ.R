@@ -1,4 +1,4 @@
-#' Simulate mis-specifications in the Q-matrix
+#' Simulate Mis-specifications in Q-matrix
 #'
 #' @description
 #' simulate certen \code{rate} mis-specifications in the Q-matrix.

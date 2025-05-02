@@ -1,7 +1,7 @@
-#' Calculate over-specification rate (OSR)
+#' Calculate Over-Specification Rate (OSR)
 #'
 #' @param Q.true The true Q-matrix.
-#' @param Q.sug The Q-matrix that has being validated.
+#' @param Q.sug The Q-matrix that has been validated.
 #'
 #' @details
 #'
@@ -22,9 +22,9 @@
 #'
 #' set.seed(123)
 #'
-#' example.Q1 <- sim.Q(5, 30)
-#' example.Q2 <- sim.MQ(example.Q1, 0.1)
-#' OSR <- zOSR(example.Q1, example.Q2)
+#' Q1 <- sim.Q(5, 30)
+#' Q2 <- sim.MQ(Q1, 0.1)
+#' OSR <- zOSR(Q1, Q2)
 #' print(OSR)
 #'
 #' @export
@@ -36,10 +36,10 @@ zOSR <- function(Q.true, Q.sug) {
 }
 
 
-#' Calculate Q-matrix recovery rate (QRR)
+#' Calculate Q-matrix Recovery Rate (QRR)
 #'
 #' @param Q.true The true Q-matrix.
-#' @param Q.sug The Q-matrix that has being validated.
+#' @param Q.sug The Q-matrix that has been validated.
 #'
 #' @details
 #' The Q-matrix recovery rate (QRR) provides information on overall performance, and is defned as:
@@ -58,9 +58,9 @@ zOSR <- function(Q.true, Q.sug) {
 #'
 #' set.seed(123)
 #'
-#' example.Q1 <- sim.Q(5, 30)
-#' example.Q2 <- sim.MQ(example.Q1, 0.1)
-#' QRR <- zQRR(example.Q1, example.Q2)
+#' Q1 <- sim.Q(5, 30)
+#' Q2 <- sim.MQ(Q1, 0.1)
+#' QRR <- zQRR(Q1, Q2)
 #' print(QRR)
 #'
 #' @export
@@ -70,11 +70,11 @@ zQRR <- function(Q.true, Q.sug) {
 }
 
 
-#' Calculate true-negative rate (TNR)
+#' Calculate True-Negative Rate (TNR)
 #'
 #' @param Q.true The true Q-matrix.
 #' @param Q.orig The Q-matrix need to be validated.
-#' @param Q.sug The Q-matrix that has being validated.
+#' @param Q.sug The Q-matrix that has been validated.
 #'
 #' @details
 #' TNR is defined as the proportion of correct elements which are correctly retained:
@@ -95,10 +95,10 @@ zQRR <- function(Q.true, Q.sug) {
 #'
 #' set.seed(123)
 #'
-#' example.Q1 <- sim.Q(5, 30)
-#' example.Q2 <- sim.MQ(example.Q1, 0.1)
-#' example.Q3 <- sim.MQ(example.Q1, 0.05)
-#' TNR <- zTNR(example.Q1, example.Q2, example.Q3)
+#' Q1 <- sim.Q(5, 30)
+#' Q2 <- sim.MQ(Q1, 0.1)
+#' Q3 <- sim.MQ(Q1, 0.05)
+#' TNR <- zTNR(Q1, Q2, Q3)
 #'
 #' print(TNR)
 #'
@@ -115,11 +115,11 @@ zTNR <- function(Q.true, Q.orig, Q.sug) {
 }
 
 
-#' Calculate true-positive rate (TPR)
+#' Calculate True-Positive Rate (TPR)
 #'
 #' @param Q.true The true Q-matrix.
 #' @param Q.orig The Q-matrix need to be validated.
-#' @param Q.sug The Q-matrix that has being validated.
+#' @param Q.sug The Q-matrix that has been validated.
 #'
 #' @details
 #' TPR is defned as the proportion of correct elements which are correctly retained:
@@ -140,10 +140,10 @@ zTNR <- function(Q.true, Q.orig, Q.sug) {
 #'
 #' set.seed(123)
 #'
-#' example.Q1 <- sim.Q(5, 30)
-#' example.Q2 <- sim.MQ(example.Q1, 0.1)
-#' example.Q3 <- sim.MQ(example.Q1, 0.05)
-#' TPR <- zTPR(example.Q1, example.Q2, example.Q3)
+#' Q1 <- sim.Q(5, 30)
+#' Q2 <- sim.MQ(Q1, 0.1)
+#' Q3 <- sim.MQ(Q1, 0.05)
+#' TPR <- zTPR(Q1, Q2, Q3)
 #'
 #' print(TPR)
 #'
@@ -160,10 +160,10 @@ zTPR <- function(Q.true, Q.orig, Q.sug) {
 }
 
 
-#' Calculate under-specification rate (USR)
+#' Calculate Under-Specification Rate (USR)
 #'
 #' @param Q.true The true Q-matrix.
-#' @param Q.sug The Q-matrix that has being validated.
+#' @param Q.sug The Q-matrix that has been validated.
 #'
 #' @details
 #' The USR is defned as:
@@ -182,9 +182,9 @@ zTPR <- function(Q.true, Q.orig, Q.sug) {
 #'
 #' set.seed(123)
 #'
-#' example.Q1 <- sim.Q(5, 30)
-#' example.Q2 <- sim.MQ(example.Q1, 0.1)
-#' USR <- zUSR(example.Q1, example.Q2)
+#' Q1 <- sim.Q(5, 30)
+#' Q2 <- sim.MQ(Q1, 0.1)
+#' USR <- zUSR(Q1, Q2)
 #' print(USR)
 #'
 #' @export
@@ -197,10 +197,10 @@ zUSR <- function(Q.true, Q.sug) {
 }
 
 
-#' Calculate vector recovery ratio (VRR)
+#' Calculate Vector Recovery Ratio (VRR)
 #'
 #' @param Q.true The true Q-matrix.
-#' @param Q.sug The Q-matrix that has being validated.
+#' @param Q.sug The Q-matrix that has been validated.
 #'
 #' @details
 #' The VRR shows the ability of the validation method to recover q-vectors, and is determined by
@@ -219,9 +219,9 @@ zUSR <- function(Q.true, Q.sug) {
 #'
 #' set.seed(123)
 #'
-#' example.Q1 <- sim.Q(5, 30)
-#' example.Q2 <- sim.MQ(example.Q1, 0.1)
-#' VRR <- zVRR(example.Q1, example.Q2)
+#' Q1 <- sim.Q(5, 30)
+#' Q2 <- sim.MQ(Q1, 0.1)
+#' VRR <- zVRR(Q1, Q2)
 #' print(VRR)
 #'
 #' @export

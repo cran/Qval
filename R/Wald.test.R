@@ -1,6 +1,6 @@
 
 #' 
-#' the Wald test for two q-vectors
+#' Wald Test for Two Q-vectors
 #' 
 #' @description
 #' This function flexibly provides the Wald test for any two q-vectors of a given item in the Q-matrix, 
@@ -9,9 +9,9 @@
 #' 
 #' @details
 #' \deqn{
-#'    Wald = \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]^{'}
-#'    (\mathbf{R} \times \mathbf{V}_{i} \times \mathbf{R})^{-1}
-#'    \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]
+#'    Wald = \left[\boldsymbol{R} \times \boldsymbol{P}_{i}(\boldsymbol{\alpha})\right]^{'}
+#'    (\boldsymbol{R} \times \boldsymbol{V}_{i} \times \boldsymbol{R})^{-1}
+#'    \left[\boldsymbol{R} \times P_{i}(\boldsymbol{\alpha})\right]
 #' }
 #' 
 #' @param CDM.obj An object of class \code{CDM.obj}. @seealso \code{\link[Qval]{CDM}}.
@@ -68,6 +68,8 @@ Wald.test <- function(CDM.obj, q1, q2, i=1){
   
   GDINA.obj <- CDM.obj$analysis.obj
   Y <- GDINA.obj$Y
+  Q <- CDM.obj$analysis.obj$Q
+  names.items <- rownames(Q)
   att.posi.i.k <- which(q2 > 0)
   att.posi.i <- which(q1 > 0)
   att.dif <- which(q1 != q2)
@@ -76,19 +78,19 @@ Wald.test <- function(CDM.obj, q1, q2, i=1){
   Qr[i, seq_len(ncol(Qr))] <- 0
   Qr[i, c(att.posi.i, att.dif)] <- 1
   etas <- LC2LG(as.matrix(Qr))
-  itemparj <- GDINA.obj$catprob.parm
   expectedR <- GDINA::extract(GDINA.obj,"expectedCorrect.LC")
   expectedN <- GDINA::extract(GDINA.obj,"expectedTotal.LC")
   
+  itemparj <- GDINA.obj$catprob.parm
   itemparj[[i]] <- aggregate(expectedR[i, ], by=list(etas[i, ]), sum)$x / aggregate(expectedN[i, ], by=list(etas[i, ]), sum)$x
   index <- data.frame(Cat=rep(1:length(rowSums(Qr) ),2^rowSums(Qr)) )
   index$Column <- seq_len(length(index$Cat))
   
   sco <- score(GDINA.obj, parm="prob") # a list with # of category elements
   sco[[i]] <- score_pj(Xj = Y[, i],                   # a vector of item responses to item i
-                               parloc.j=etas[i, ,drop=FALSE],         # parameter locations for item i - H by 2^K matrix
-                               catprob.j=itemparj[i],        # a list with H elements giving the reduced catprob.parm for each nonzero category
-                               logpost=indlogPost(GDINA.obj))[[1]]
+                       parloc.j=etas[i, ,drop=FALSE],         # parameter locations for item i - H by 2^K matrix
+                       catprob.j=itemparj[i],        # a list with H elements giving the reduced catprob.parm for each nonzero category
+                       logpost=indlogPost(GDINA.obj))[[1]]
   
   ## v is the inversed information matrix
   if(GDINA::extract(GDINA.obj, "att.dist") != "saturated"){
@@ -104,13 +106,31 @@ Wald.test <- function(CDM.obj, q1, q2, i=1){
   ## Restricted matrix based on q1 and q2
   Rmatrix <- get.Rmatrix(q1, q2)
   
-  Wald.statistic <-t(Rmatrix %*% P.Xi.alpha.reduced) %*% ginv(Rmatrix %*% cov %*% t(Rmatrix)) %*% (Rmatrix %*% P.Xi.alpha.reduced)
+  R.cov.Rt <- Rmatrix %*% cov %*% t(Rmatrix)  # R %*% cov %*% R^T
+  R.P <- Rmatrix %*% P.Xi.alpha.reduced    # R %*% P.Xi.alpha.reduced
+  
+  R.cov.Rt.det <- det(R.cov.Rt)
+  if (!is.na(R.cov.Rt.det)) {
+    R.cov.Rt.solved <- solve(R.cov.Rt)
+  }else{
+    R.cov.Rt.solved <- ginv(R.cov.Rt)
+  }
+  Wald.statistic <- t(R.P) %*% R.cov.Rt.solved %*%R.P
+  
   parameter = nrow(Rmatrix)
   p.value <- pchisq(Wald.statistic, parameter, lower.tail = FALSE)
   
-  Wald.obj <- list(statistic=Wald.statistic, parameter=parameter, p.value=p.value)
-  
+  Wald.obj <- list(
+    statistic = c(Wald = as.numeric(Wald.statistic)),
+    parameter = c(df = parameter),
+    p.value = as.numeric(p.value),
+    method = "Wald test for two q-vectors",
+    data.name = paste0(paste0("[", paste(q1, collapse = ""), "] "), 
+                       "vs. ", 
+                       paste0("[", paste(q2, collapse = ""), "] "), 
+                       "for ", names.items[i])
+  )
   class(Wald.obj) <- "htest"
-  
+
   return(Wald.obj)
 }

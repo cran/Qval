@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim.Q.R
 \name{sim.Q}
 \alias{sim.Q}
-\title{generate a random Q-matrix}
+\title{Generate a Random Q-matrix}
 \usage{
 sim.Q(K, I)
 }

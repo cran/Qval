@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit.R
 \name{fit}
 \alias{fit}
-\title{Calculate fit indeces}
+\title{Calculate Fit Indices}
 \usage{
 fit(Y, Q, model = "GDINA")
 }
@@ -36,6 +36,7 @@ Calculate relative fit indices (-2LL, AIC, BIC, CAIC, SABIC) and absolute fit in
 using the \code{\link[GDINA]{modelfit}} function in the \code{GDINA} package.
 }
 \examples{
+\donttest{
 set.seed(123)
 
 library(Qval)
@@ -43,16 +44,17 @@ library(Qval)
 ## generate Q-matrix and data to fit
 K <- 5
 I <- 30
-example.Q <- sim.Q(K, I)
+Q <- sim.Q(K, I)
 IQ <- list(
   P0 = runif(I, 0.0, 0.2),
   P1 = runif(I, 0.8, 1.0)
 )
-example.data <- sim.data(Q = example.Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
+data <- sim.data(Q = Q, N = 500, IQ = IQ, model = "GDINA", distribute = "horder")
 
 ## calculate fit indices
-fit.indices <- fit(Y = example.data$dat, Q = example.Q, model = "GDINA")
+fit.indices <- fit(Y = data$dat, Q = Q, model = "GDINA")
 print(fit.indices)
+}
 
 }
 \references{

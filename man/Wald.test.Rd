@@ -2,7 +2,7 @@
 % Please edit documentation in R/Wald.test.R
 \name{Wald.test}
 \alias{Wald.test}
-\title{the Wald test for two q-vectors}
+\title{Wald Test for Two Q-vectors}
 \usage{
 Wald.test(CDM.obj, q1, q2, i = 1)
 }
@@ -30,9 +30,9 @@ to accept a \code{CDM.obj}.
 }
 \details{
 \deqn{
-   Wald = \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]^{'}
-   (\mathbf{R} \times \mathbf{V}_{i} \times \mathbf{R})^{-1}
-   \left[\mathbf{R} \times P_{i}(\mathbf{\alpha})\right]
+   Wald = \left[\boldsymbol{R} \times \boldsymbol{P}_{i}(\boldsymbol{\alpha})\right]^{'}
+   (\boldsymbol{R} \times \boldsymbol{V}_{i} \times \boldsymbol{R})^{-1}
+   \left[\boldsymbol{R} \times P_{i}(\boldsymbol{\alpha})\right]
 }
 }
 \examples{

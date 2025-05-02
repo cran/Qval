@@ -29,3 +29,8 @@ StartWelcomeMessage <- function(){
         "; ",utils::packageDescription("Qval")$Date, ")\n",
         sep="")
 }
+
+printPackageInfo <- function() {
+  packageinfo <- utils::packageDescription("Qval")
+  cat(paste("Qval version", packageinfo$Version, "(", packageinfo$Date, ")", sep = ""), "\n")
+}

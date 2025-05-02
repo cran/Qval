@@ -17,14 +17,16 @@ is not \code{NULL}.}
 An object of class \code{matrix}.
 }
 \description{
-Calculate \eqn{\mathbf{M}} matrix for stauted CDMs (de la Torre, 2011). The \eqn{\mathbf{M}} matrix is a matrix used to 
+Calculate \eqn{\mathbf{M}} matrix for saturated CDMs (de la Torre, 2011). The \eqn{\mathbf{M}} matrix is a matrix used to 
 represent the interaction mechanisms between attributes.
 }
 \examples{
 
 library(Qval)
 
-example.Mmatrix <-  get.Mmatrix(K = 3)
+Mmatrix <-  get.Mmatrix(K = 3)
+
+print(Mmatrix)
 
 }
 \references{
